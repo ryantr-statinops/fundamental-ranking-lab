@@ -13,7 +13,7 @@ Mỗi quý, sử dụng thông tin fundamental đã công bố để đánh giá
 - [Hypothesis testing và đánh giá](03-hypothesis-validation.md)
 - [Thông tin được phép dùng](04-point-in-time-data.md)
 - [Portfolio và lộ trình](05-portfolio-roadmap.md)
-- [Quyết định mở và nguồn](06-open-decisions-references.md)
+- [Quyết định và nguồn](06-open-decisions-references.md)
 - [Bảng tham số tổng hợp](07-spec-parameters.md)
 
 ## Đã xác định
