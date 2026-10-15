@@ -87,7 +87,7 @@ Báo cáo:
 - Sức mạnh: median composite score.
 - Chi tiết: median bốn trục riêng.
 - Đồng thuận: dispersion (IQR hoặc std của member scores).
-- Breadth: tỷ lệ mã trên median universe và tỷ lệ mã đạt ngưỡng chất lượng (theo phân vị, chốt con số sau).
+- Breadth: tỷ lệ mã trên median universe và tỷ lệ mã đạt ngưỡng chất lượng (composite score ≥ phân vị 50 universe).
 - Độ phủ: tỷ lệ ratio hợp lệ; tỷ lệ mã đủ 3/4 trục.
 - Quy mô: số mã eligible và số mã lọt top-100.
 - Động lượng: thay đổi hạng và median score so quý trước.
@@ -97,6 +97,6 @@ Không chuẩn hóa tất cả scores trong từng ngành rồi lấy trung bìn
 
 Ngành chất lượng cao, cải thiện nhanh, định giá thấp và nhiều doanh nghiệp tốt là các khía cạnh riêng.
 
-## Điểm mở
+## Trạng thái
 
-Con số ngưỡng chất lượng (breadth) còn mở ở [06](06-open-decisions-references.md). Ngưỡng hard filters, hệ thống và cấp ngành, và bộ ratio cụ thể đã chốt.
+Mọi thành phần thiết kế trong file này đã chốt. Xem bảng trạng thái ở [06](06-open-decisions-references.md) và bảng tham số tổng hợp ở [07](07-spec-parameters.md).
