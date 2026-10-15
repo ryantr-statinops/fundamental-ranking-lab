@@ -1,6 +1,6 @@
 # Stage 00 — Nền tảng kỹ thuật
 
-Trạng thái: chưa bắt đầu. Phụ thuộc: [idea](../idea/README.md). Bàn giao cho [stage 01](01-data-feasibility-pilot.md). Stage này xây nền tảng code bằng fixtures, chưa thu thập dữ liệu diện rộng hoặc tính hiệu quả đầu tư.
+Trạng thái: đang triển khai; checklist cập nhật theo kết quả kiểm tra thực tế bên dưới. Phụ thuộc: [idea](../idea/README.md). Bàn giao cho [stage 01](01-data-feasibility-pilot.md). Stage này xây nền tảng code bằng fixtures, chưa thu thập dữ liệu diện rộng hoặc tính hiệu quả đầu tư.
 
 ## Mục tiêu và đầu vào
 
@@ -41,6 +41,20 @@ Interface chung dự kiến: `uv run frl <command> --config <file>`, offline tra
 Exit codes: 0 đạt cổng, 2 cấu hình sai, 3 data gate thất bại, 1 lỗi chương trình/IO/network không khắc phục. Run thất bại vẫn lưu manifest và JSONL log; không xuất artifact trạng thái approved. Run ID dùng UTC timestamp + UUID; write vào thư mục tạm cùng volume rồi atomic rename khi hoàn chỉnh. `latest` pointer chỉ đổi sau thành công, không overwrite run cũ.
 
 ## Công việc và nghiệm thu
+
+### Checklist bàn giao
+
+- [x] Khởi tạo package `src/`, entrypoint `frl`, config TOML mẫu và validator từ chối khóa lạ.
+- [x] Thêm helper manifest/hash và Parquet writer có kiểm schema, publish atomic, không overwrite.
+- [x] Thêm bộ kiểm thử offline cho config, manifest, Parquet và `doctor`.
+- [x] Thêm CI Windows/Linux chạy locked sync, Ruff, mypy và pytest.
+- [x] Bổ sung technical references, setup/config/troubleshooting guides và cập nhật README.
+- [ ] Resolve và commit `uv.lock`; cài môi trường dev trên CPython 3.13.
+- [ ] Chạy pytest, Ruff, mypy, CLI doctor và import/Parquet smoke thành công trên Windows.
+- [ ] CI Windows và Linux xanh trên commit đã push.
+- [ ] Kiểm tra lại các tuyên bố của checklist với kết quả cuối trước khi đánh dấu stage hoàn tất.
+
+Các ô được đánh dấu hoàn thành chỉ xác nhận file đã được tạo; chúng không thay thế các cổng chạy thực tế ở dưới.
 
 1. Khởi tạo package, config models, CLI doctor, manifest/hash và storage adapters tối thiểu; sample config không có credentials.
 2. Tạo fixtures đủ thử timezone, raw-to-Parquet, identity interval, null reason và lineage. Offline transform không được gọi mạng ngầm.
