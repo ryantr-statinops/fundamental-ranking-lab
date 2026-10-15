@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from pathlib import Path
+from uuid import UUID
 
 import pytest
 from pydantic import ValidationError
@@ -28,6 +29,13 @@ def test_manifest_requires_aware_time_and_safe_run_id() -> None:
             config_sha256="a" * 64,
             code_revision="abc123",
         )
+
+
+def test_run_id_uses_utc_timestamp_and_uuid() -> None:
+    run_id = new_run_id(datetime(2026, 1, 2, tzinfo=UTC))
+    timestamp, identifier = run_id.split("-")[:1][0], "-".join(run_id.split("-")[1:])
+    assert timestamp.startswith("20260102T000000.") and timestamp.endswith("Z")
+    UUID(identifier)
 
 
 def test_manifest_publish_is_atomic_and_does_not_overwrite(tmp_path: Path) -> None:
