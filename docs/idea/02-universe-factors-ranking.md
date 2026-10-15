@@ -18,16 +18,41 @@ Candidate pool khoảng 100 mã lấy top-100 theo **score so ngành** (chuẩn 
 
 ## Bốn trục
 
-Doanh nghiệp tốt chưa chắc là khoản đầu tư hấp dẫn tại mọi mức giá. Giữ chung bốn trục nhưng ratios phù hợp từng ngành, đặc biệt với ngân hàng. Bộ ratio cụ thể để mở theo thị trường.
+Doanh nghiệp tốt chưa chắc là khoản đầu tư hấp dẫn tại mọi mức giá. Giữ chung bốn trục; ratios phù hợp từng ngành.
 
-| Trục | Câu hỏi | Level (TTM) | Change (YoY) |
+### General (15 ngành còn lại)
+
+| Trục | Ratios (level, TTM) | Chiều tốt |
+|---|---|---|
+| Quality | Gross margin, Operating margin, ROE, CFO/NetIncome | cao |
+| Growth | Revenue growth, NetIncome growth, FCF growth, Δoperating margin | cao |
+| Financial Health | Net debt/EBITDA, Interest coverage, Current ratio, Debt/Equity | EBITDA và D/E thấp; coverage và current ratio cao |
+| Valuation | Earnings yield (E/P), FCF yield, EV/EBITDA, B/P | yield cao; EV/EBITDA thấp |
+
+### Finan (Banks, Insurance, Other Financials) — tách sub-block bằng SIC
+
+| Sub-block | Quality | Financial Health | Valuation |
 |---|---|---|---|
-| Quality | Lợi nhuận/dòng tiền có chất lượng không? | ROIC/ROE, margins, cash flow so với earnings | ΔROIC, Δmargin |
-| Growth | Kinh doanh có cải thiện không? | Tốc độ tăng trưởng hiện tại | Gia tốc tăng trưởng |
-| Financial Health | Bảng cân đối có vững không? | Leverage, interest coverage, liquidity | Δleverage, Δcoverage |
-| Valuation | Giá hấp dẫn so với fundamentals không? | Earnings yield, FCF yield, bội số phù hợp ngành | Thay đổi yield/bội số |
+| Ngân hàng (SIC 60xx) | ROE, ROA, net margin | equity/assets, loan/deposit | E/P, B/P, dividend yield |
+| Bảo hiểm (SIC 63xx) | ROE, combined ratio | equity/assets | E/P, B/P, dividend yield |
+| REIT/real estate (SIC 65xx, 6798) | FFO/assets, FFO margin | Net debt/EBITDA, interest coverage | P/FFO, dividend yield, EV/EBITDA |
+
+Net debt/EBITDA và interest coverage không áp dụng cho ngân hàng và bảo hiểm.
+
+### Utils
+
+| Trục | Ratios |
+|---|---|
+| Quality | ROE, Operating margin, CFO/NetIncome |
+| Growth | Revenue growth, EPS growth, dividend growth |
+| Financial Health | Net debt/EBITDA, interest coverage |
+| Valuation | E/P, EV/EBITDA, dividend yield, B/P |
+
+### Cấu trúc và xử lý
 
 Mỗi trục gồm hai nhóm: level (TTM, 4 quý) và change (YoY, so cùng quý năm trước). Trong mỗi nhóm, các chỉ số equal-weight nội bộ; điểm trục là trung bình hai nhóm theo tỷ lệ 50/50. Change tính trên chỉ số gốc rồi mới chuẩn hóa. TTM và YoY giúp tránh seasonality.
+
+Ratios tự tính từ EDGAR XBRL. REIT xấp xỉ FFO = Net Income + depreciation − gains; bỏ nếu thiếu. Ratio thiếu áp dụng missing policy ở phần "Thiết kế score".
 
 ## Thiết kế score
 
