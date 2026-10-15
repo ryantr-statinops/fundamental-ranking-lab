@@ -1,6 +1,6 @@
 # Stage 00 — Nền tảng kỹ thuật
 
-Trạng thái: đang triển khai; checklist cập nhật theo kết quả kiểm tra thực tế bên dưới. Phụ thuộc: [idea](../idea/README.md). Bàn giao cho [stage 01](01-data-feasibility-pilot.md). Stage này xây nền tảng code bằng fixtures, chưa thu thập dữ liệu diện rộng hoặc tính hiệu quả đầu tư.
+Trạng thái: đã triển khai; acceptance cục bộ và CI Windows/Linux đã qua. Stage 01 tiếp tục với pilot dữ liệu thật. Stage này chỉ dựng foundation bằng fixtures, chưa thu thập dữ liệu diện rộng hoặc tính hiệu quả đầu tư.
 
 ## Mục tiêu và đầu vào
 
@@ -46,13 +46,13 @@ Exit codes: 0 đạt cổng, 2 cấu hình sai, 3 data gate thất bại, 1 lỗ
 
 - [x] Khởi tạo package `src/`, entrypoint `frl`, config TOML mẫu và validator từ chối khóa lạ.
 - [x] Thêm helper manifest/hash và Parquet writer có kiểm schema, publish atomic, không overwrite.
-- [x] Thêm bộ kiểm thử offline cho config, manifest, Parquet và `doctor`.
+- [x] Thêm schema version 1 và bộ kiểm thử offline cho khóa trùng, interval overlap, UTC timestamps, units, missing reasons, lineage, Parquet và `doctor`.
 - [x] Thêm CI Windows/Linux chạy locked sync, Ruff, mypy và pytest.
 - [x] Bổ sung technical references, setup/config/troubleshooting guides và cập nhật README.
-- [ ] Resolve và commit `uv.lock`; cài môi trường dev trên CPython 3.13.
-- [ ] Chạy pytest, Ruff, mypy, CLI doctor và import/Parquet smoke thành công trên Windows.
-- [ ] CI Windows và Linux xanh trên commit đã push.
-- [ ] Kiểm tra lại các tuyên bố của checklist với kết quả cuối trước khi đánh dấu stage hoàn tất.
+- [x] Resolve và commit `uv.lock`; cài môi trường dev trên CPython 3.13.
+- [x] Chạy pytest, Ruff, mypy, CLI doctor và import/calendar/Parquet smoke thành công trên Windows.
+- [x] CI Windows và Linux xanh trên commit đã push.
+- [x] Đối chiếu checklist cuối; giữ các kiểm tra về dữ liệu thật và audit ở stage 01/02.
 
 Các ô được đánh dấu hoàn thành chỉ xác nhận file đã được tạo; chúng không thay thế các cổng chạy thực tế ở dưới.
 
