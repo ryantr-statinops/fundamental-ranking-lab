@@ -1,53 +1,47 @@
 # Hypothesis testing và đánh giá
 
-## Vai trò
+## Ba kiểm định chính
 
-Kiểm định đánh giá bằng chứng lịch sử, không xác nhận cổ phiếu chắc chắn tăng. Phân biệt return dương, outperform benchmark và giá trị gia tăng của phương pháp chọn mã.
+Horizon từ mở phiên sau cutoff tới mở phiên sau cutoff quý kế tiếp. Score là lõi chung; universe và cổng nhóm theo [02](02-universe-factors-ranking.md). Các giả thuyết một phía H0: E[đại lượng] ≤ 0; H1: > 0.
 
-## Đối tượng và giả thuyết
+| ID | Đại lượng chính | Định nghĩa |
+|---|---|---|
+| Q1 | Fama–MacBeth slope | Mỗi quý OLS forward total return theo score, intercept và industry dummies (bỏ một dummy); mỗi doanh nghiệp một quan sát, equal-weight |
+| Q2 | Top-minus-bottom ngành | Chia các ngành có eligible member thành terciles theo median score; return ngành equal-weight member, mỗi phía equal-weight ngành |
+| Q3 | Net excess return | Net return danh mục score-weight + tilt trừ net return universe equal-weight |
 
-Ba câu hỏi con ở [01](01-concept.md); horizon một quý. Cả ba kiểm định một phía: H0 E[·] ≤ 0, H1 E[·] > 0.
+Q1 dùng score liên tục, không phải kiểm định chênh lệch tercile. Không fit nếu score không có biến thiên độc lập với industry dummies hoặc không còn bậc tự do; ghi quý unavailable và lý do, không điền slope 0. Q2 cần ít nhất 3 ngành; ties tại ranh giới giữ cùng bucket bằng cutpoints phân vị 1/3 và 2/3 (bottom ≤ q1, top > q2); nếu phía nào trống thì quý unavailable. Không tách ties tùy ý để tạo spread.
 
-| Đối tượng | Câu hỏi | Nhóm so sánh | Đại lượng |
-|---|---|---|---|
-| Q1 Factor score | Score cao liên hệ kết quả tương lai tốt hơn? | Tercile top vs bottom trong ngành, cap-weight | Fama–MacBeth slope; Rank IC |
-| Q2 Ranking ngành | Ngành điểm cao outperform ngành điểm thấp? | Top vs bottom tercile ngành theo median | Top-minus-comparison return |
-| Q3 Portfolio | Phương pháp tạo giá trị sau chi phí? | Net danh mục trừ universe equal-weight | Net excess return |
+Returns Q1/Q2 là gross total returns để đo tín hiệu; spread là công cụ nghiên cứu, không giả định giao dịch short. Q3 là hiệu quả thực thi sau phí/cash. Không xem mã cùng quý là các quan sát thời gian độc lập.
 
-Q1: hệ số (slope) của score trong cross-sectional regression kỳ vọng dương. Q2 và Q3: trung bình spread/excess theo thời gian kỳ vọng dương.
+## Inference và phân tích phụ
 
-Q1 chia tercile trong ngành, so top với bottom, cap-weight. Ngành nhỏ vẫn chia tercile, không gộp; chấp nhận nhiễu và ghi rõ trong báo cáo. Cap-weight nhóm so sánh có thể lệch theo size, cần lưu ý khi diễn giải.
+Kiểm định trung bình chuỗi slope/spread/excess bằng Newey–West, Bartlett kernel; lag mặc định floor(4 × (T/100)^(2/9)), chặn tại T−1. Báo T và lag thực. Block bootstrap bổ trợ theo thời gian, circular moving blocks 4 quý, 5000 lần, seed 20261015; báo percentile 95% CI hai phía. Không nối các đoạn sample bị thiếu như liên tiếp khi tạo blocks; đoạn không đủ 4 quý không bootstrap, ghi rõ.
 
-Spread portfolio là công cụ nghiên cứu, không bắt buộc giao dịch short. Nhóm, trọng số và horizon chốt trước khi đánh giá.
+Family chính chỉ gồm Q1/Q2/Q3, BH với α = 0,05; raw và adjusted p-value đều công bố. Không loại test unavailable để thu nhỏ family: giữ slot với p = 1 cho hiệu chỉnh và gắn nhãn chưa kiểm định, không coi là bằng chứng H0 đúng. BH có giả định phụ thuộc; báo Holm bổ trợ nếu cấu trúc phụ thuộc không được biện minh. Không diễn giải BH như bảo đảm độc lập với giả định.
 
-## Phương pháp
+Phụ: Spearman Rank IC trong ngành, sign test, monotonicity buckets, top-minus-bottom tercile cổ phiếu trong ngành (cap-weight với market cap point-in-time); z-score, cap/chi phí sensitivity và ablation. Đăng ký manifest các phép phân tích phụ trước chạy; hiệu chỉnh BH riêng toàn family phụ được đăng ký và ghi exploratory, không đưa kết quả đẹp lên primary. Nhóm ngành < 3 mã bỏ phân tích tercile cổ phiếu, vẫn công bố coverage.
 
-**Q1 — chính: Fama–MacBeth.** Mỗi quý chạy cross-sectional regression forward return theo score (kèm industry), lấy trung bình hệ số theo thời gian và test bằng Newey–West. **Bổ trợ:** Rank IC mỗi quý; sign test tỷ lệ quý IC > 0; monotonicity giữa các bucket; portfolio spread để đo độ lớn kinh tế.
+Net excess không tự là risk-adjusted alpha. Factor regression Ken French chỉ bổ trợ khi đồng bộ frequency và risk-free rate, không dùng tên alpha cho excess đơn giản.
 
-**Q2 và Q3 — trung bình theo thời gian.** Kiểm định trung bình spread/excess bằng HAC (Newey–West, auto lags) và block bootstrap theo thời gian (block 4 quý, 5000 lần lặp) để kiểm tra độ bền.
+## Ngoài mẫu và khóa cấu hình
 
-Không xem các mã cùng quý là quan sát độc lập; baseline là chuỗi kết quả danh mục theo quý.
+Khoảng tín hiệu mục tiêu 2010Q1–2025Q4, outcome đến phiên mở đầu quý II/2026. Research 2010–2019; validation 2020–2022; test 2023–2025. Không mô tả xấp xỉ 60/20/20 như split chính xác.
 
-Mức ý nghĩa α = 0.05, kiểm định một phía. Định nghĩa một family of tests cho toàn study (Q1/Q2/Q3 cùng các biến thể factor/ngành/horizon) và hiệu chỉnh Benjamini–Hochberg; báo cáo cả p-value raw và adjusted. BH có điều kiện về phụ thuộc, không áp máy móc.
+Purge observation nếu outcome kết thúc sau ranh giới split: loại tín hiệu 2019Q4 khỏi research và 2022Q4 khỏi validation vì exits sang năm sau. Theo cùng nguyên tắc xử lý sample thực sau audit; không thêm “embargo một quý” thứ hai mà không có lý do. Primary test tối đa 12 kỳ quý; công bố số kỳ thực và CI, không khẳng định đủ statistical power chỉ vì có nhiều mã.
 
-Excess return đơn giản không tự đồng nghĩa risk-adjusted alpha; alpha regression cần factor model riêng. Ranking ngành dựa score; p-value không phải điểm hấp dẫn.
+Audit scope/sample theo dữ liệu trước xem performance; ghi manifest dates, exclusions, factor/tag version, universe/industry mapping, weights, costs, primary/secondary tests. Nếu phạm vi thay đổi sau khi đã xem test, kết quả mới là exploratory; muốn xác nhận cần dữ liệu chưa dùng.
 
-## Thiết kế ngoài mẫu
+Khóa factors, λ = 0,5, caps 20%/5%, top-100, chi phí và baseline trước mở final test. Validation kiểm tra feasibility/độ bền; thay đổi có lý do phải version lại, không tự chọn cấu hình có return đẹp nhất. Không tuning trên final test.
 
-Chia theo thời gian: 60% research, 20% validation, 20% test. Sample v1: 2010Q1–2025Q4 (EDGAR XBRL ổn định từ ~2009). Research 2010–2019, validation 2020–2022, test 2023–2025. Embargo một quý ở ranh giới split để tránh chồng lấn label; horizon một quý và rebalance rời rạc nên yêu cầu nhẹ.
+## Baselines và attribution
 
-Khóa factors, trọng số, horizon và portfolio trước final test. Không chọn cấu hình bằng kết quả final test.
+Baseline chính: mọi doanh nghiệp eligible cùng cutoff, equal-weight, cùng lịch open-to-open, xử lý corporate actions, chi phí một chiều và terminal exit. Baseline này không áp caps chủ động của strategy; báo khác biệt concentration và cash để tránh quy hết hiệu quả cho score.
 
-Baselines: universe equal-weight (chính), danh mục cùng ngành/giới hạn rủi ro, danh mục ngẫu nhiên cùng cỡ. Comparison portfolio phụ: nhóm score thấp cùng ngành (tercile bottom), cap-weight — công cụ nghiên cứu, không giao dịch short.
+Ablations cùng candidate pool: top-100 equal-weight và score-weight không tilt (λ = 0), cùng caps/cost/cash algorithm để tách weighting và tilt. Báo thêm benchmark có tỷ lệ cash khớp strategy để nhận diện cash drag; không thay baseline chính. Sensitivity ngành 15%/25%, chi phí 0/25/50 bps không dùng chọn cấu hình bằng test.
 
-## Metrics
+## Metrics và diễn giải
 
-- Ranking: Spearman Rank IC theo quý, return theo score buckets, stability, monotonicity. NDCG tùy chọn nếu định nghĩa được relevance.
-- Portfolio: net/excess return, Sharpe, maximum drawdown, turnover, liquidity, concentration, information ratio, hit rate, Calmar, profit factor (bổ trợ), CAGR (số tóm tắt mô tả).
-- Inference: effect size, confidence interval, p-value raw và BH-adjusted, số quan sát.
+Ranking: Rank IC, buckets, monotonicity, rank stability và độ phủ. Portfolio: gross/net/excess, CAGR mô tả, quarterly Sharpe/IR (annualize √4), maximum drawdown theo tần suất NAV thực có, turnover, cash, top-10, issuer/industry concentration và số mã hiệu dụng. Không gọi quarterly drawdown là daily drawdown. Inference: effect size, CI, raw/adjusted p, T, unavailable periods và data blockers.
 
-## Diễn giải
-
-10 năm có khoảng 40 kỳ quý. Nhiều mã không tự bù số kỳ thời gian thấp.
-
-P-value nhỏ không đảm bảo hiệu quả tương lai. Không bác bỏ H0 không chứng minh phương pháp vô dụng. Statistical significance không thay thế hiệu quả kinh tế sau chi phí. CAGR chỉ là số tóm tắt, không dùng làm mục tiêu suy diễn. Kết quả âm vẫn là kết quả nghiên cứu hợp lệ.
+Kết quả âm hoặc chưa đủ bằng chứng vẫn hoàn thành nghiên cứu nếu tái lập và báo trung thực. Nếu unresolved dữ liệu ngăn return đáng tin, chỉ hoàn thành feasibility, chưa hoàn thành backtest/inference. Không bác bỏ H0 không chứng minh vô dụng; significance không thay hiệu quả kinh tế hoặc quyết định sử dụng vốn.
