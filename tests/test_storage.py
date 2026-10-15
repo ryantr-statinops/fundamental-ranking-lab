@@ -24,8 +24,10 @@ def test_parquet_round_trip_and_no_overwrite(tmp_path: Path) -> None:
 def test_parquet_rejects_schema_mismatch(tmp_path: Path) -> None:
     expected = pa.schema([pa.field("value", pa.int64())])
     actual = pa.table({"value": [1.0]})
+    destination = tmp_path / "invalid.parquet"
     with pytest.raises(ValueError, match="schema"):
-        write_parquet_atomic(actual, tmp_path / "invalid.parquet", expected)
+        write_parquet_atomic(actual, destination, expected)
+    assert not destination.exists()
 
 
 def test_parquet_rejects_null_in_nonnullable_field(tmp_path: Path) -> None:
