@@ -2,7 +2,7 @@
 
 Nghiên cứu định lượng về việc sử dụng dữ liệu tài chính doanh nghiệp để xếp hạng cổ phiếu và ngành tại thị trường Mỹ, xây dựng danh mục cập nhật hàng quý và kiểm chứng hiệu quả ngoài mẫu sau chi phí.
 
-**Trạng thái: thiết kế nghiên cứu đã xác định; bước tiếp theo là kiểm chứng dữ liệu.** Repository hiện chứa tài liệu nghiên cứu. Chưa triển khai pipeline, chưa thực hiện pilot hoặc backtest và chưa có kết quả performance. Tên dự án là tên tạm thời.
+**Trạng thái: thiết kế nghiên cứu đã xác định; bước tiếp theo là kiểm chứng dữ liệu.** Repository chứa tài liệu nghiên cứu và foundation code của Stage 00. Pipeline dữ liệu/nghiên cứu, pilot và backtest chưa hoàn thành; chưa có kết quả performance. Tên dự án là tên tạm thời.
 
 ## Mục tiêu nghiên cứu
 
@@ -100,4 +100,20 @@ Bắt đầu tại [bản đồ docs](docs/README.md) để phân biệt nội d
 | [Quyết định và nguồn](docs/idea/06-open-decisions-references.md) | Phân biệt đã chốt, mặc định, chờ kiểm chứng và hoãn |
 | [Bảng tham số tổng hợp](docs/idea/07-spec-parameters.md) | Tra nhanh giá trị và vị trí quy tắc gốc |
 
-Hiện chưa có ứng dụng hoặc CLI để cài đặt/chạy. Hướng dẫn môi trường, lệnh tái lập và cấu trúc mã nguồn sẽ được bổ sung khi pipeline đầu tiên được triển khai. Khi thay đổi thiết kế, cập nhật tài liệu nguồn trong `docs/idea`, sổ quyết định và bảng tham số; README này giữ vai trò tổng quan.
+## Bắt đầu phát triển
+
+Stage 00 đang dựng nền tảng kỹ thuật. Máy phát triển cần CPython 3.13 và [`uv`](https://docs.astral.sh/uv/). Từ thư mục gốc, cài môi trường đã khóa và chạy kiểm tra offline:
+
+```powershell
+uv python install 3.13
+uv sync --locked --extra dev
+uv run frl doctor --config configs/sample.toml
+uv run pytest
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy src
+```
+
+`frl doctor` chỉ đọc runtime và config; chưa tải dữ liệu hay gọi provider. Xem [hướng dẫn setup](docs/guides/setup.md), [configuration](docs/guides/configuration.md) và [technical architecture](docs/technical/architecture.md). Pipeline nghiên cứu vẫn chưa được triển khai; các lệnh ingest, ranking và backtest chưa khả dụng.
+
+Khi thay đổi thiết kế, cập nhật tài liệu nguồn trong `docs/idea`, sổ quyết định và bảng tham số; README này giữ vai trò tổng quan.
