@@ -10,6 +10,7 @@ import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -43,7 +44,7 @@ class RunManifest(BaseModel):
 def new_run_id(now: datetime | None = None) -> str:
     """Create a sortable UTC identifier with a random suffix."""
     instant = (now or datetime.now(UTC)).astimezone(UTC)
-    return f"{instant:%Y%m%dT%H%M%S.%fZ}-{os.urandom(4).hex()}"
+    return f"{instant:%Y%m%dT%H%M%S.%fZ}-{uuid4()}"
 
 
 def sha256_file(path: Path) -> str:
