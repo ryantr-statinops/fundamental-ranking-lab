@@ -17,6 +17,12 @@ Ngày lập: 2026-10-15. Bộ tài liệu này chuyển [research specification]
 
 Đi tuần tự; stage 01 được xây lát cắt nhỏ ingestion/features để pilot, stage 02/03 mở rộng và củng cố lại cùng code, không tạo pipeline thứ hai. Fixtures tổng hợp có thể xây trước khi dữ liệu thật đạt cổng; không dùng chúng làm bằng chứng performance.
 
+## Bàn giao tài liệu theo stage
+
+[Kế hoạch bổ sung tài liệu](documentation-delivery.md) phân công nội dung technical, research và guides cho từng stage, với file dự kiến và tiêu chí nghiệm thu. Đây là công việc xuyên suốt 00–07, không phải stage mới thực hiện sau 07. [Bản đồ docs](../README.md) là điểm vào chung; các README nhóm hiện mới ghi mục đích/backlog, chưa xác nhận đã có implementation hoặc kết quả.
+
+Stage 00 bắt đầu technical references và setup/config guides cùng code; stage 01–02 ghi bằng chứng pilot/nguồn/universe; stage 04–06 bổ sung hướng dẫn đọc kết quả và study findings; stage 07 hoàn thiện quarterly/backup runbooks. Không tạo sẵn hàng loạt hướng dẫn chạy khi commands chưa tồn tại.
+
 ## Ranh giới giữa idea và plan
 
 - `docs/idea/` quyết định câu hỏi, công thức và giả định nghiên cứu. `docs/plan/` quyết định cách hiện thực, interfaces, artifacts và kiểm tra.
