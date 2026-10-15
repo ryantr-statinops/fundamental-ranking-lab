@@ -4,13 +4,13 @@
 
 Universe xác định tại từng thời điểm; lọc bằng hard filters để tạo universe đủ điều kiện, tách khỏi candidate pool. Hard filters là pass/fail và tách khỏi fundamental score.
 
-Loại hard filter thuộc v1; ngưỡng cụ thể để mở ở [06](06-open-decisions-references.md):
+Loại hard filter thuộc v1; ngưỡng v1 mặc định (xem lại khi có dữ liệu):
 
-- Dữ liệu đầy đủ cho các ratio bắt buộc.
-- Lịch sử tối thiểu.
-- Thanh khoản.
-- Trạng thái niêm yết.
-- Khả năng đầu tư.
+- Dữ liệu đầy đủ: đủ để tính score so ngành (đạt ngưỡng độ phủ ≥ 3/4 trục).
+- Lịch sử tối thiểu: ≥ 8 quý báo cáo đã công bố.
+- Thanh khoản: ADV 20 ngày ≥ 1 triệu USD (dollar volume).
+- Trạng thái niêm yết: còn giao dịch tại cutoff (có giá).
+- Khả năng đầu tư: giá ≥ 1 USD; niêm yết NYSE/NASDAQ/AMEX (loại OTC/penny).
 
 Candidate pool khoảng 100 mã lấy top-100 theo **score so ngành** (chuẩn hóa trên toàn universe đủ điều kiện). Lấy hết các mã bằng điểm ở vị trí thứ 100, nên số lượng có thể vượt 100. Nếu universe đủ điều kiện ít hơn 100 mã, lấy hết và chấp nhận số lượng biến động.
 
@@ -99,4 +99,4 @@ Ngành chất lượng cao, cải thiện nhanh, định giá thấp và nhiều
 
 ## Điểm mở
 
-Ngưỡng hard filters, hệ thống và cấp ngành, bộ ratio cụ thể, và con số ngưỡng chất lượng để mở ở [06](06-open-decisions-references.md).
+Con số ngưỡng chất lượng (breadth) còn mở ở [06](06-open-decisions-references.md). Ngưỡng hard filters, hệ thống và cấp ngành, và bộ ratio cụ thể đã chốt.
