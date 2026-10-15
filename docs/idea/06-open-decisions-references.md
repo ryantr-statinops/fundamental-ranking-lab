@@ -1,4 +1,4 @@
-# Quyết định mở và nguồn
+# Quyết định và nguồn
 
 ## Trạng thái quyết định
 
