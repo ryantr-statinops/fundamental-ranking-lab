@@ -1,12 +1,12 @@
 # Data contracts and storage
 
-Stage 00 establishes storage conventions and a generic Parquet writer; it does not yet implement the domain tables below. Their schemas and constraints are introduced with the data-feasibility pilot and refined before universe-wide ingestion.
+Stage 00 establishes versioned Arrow schema contracts for the domain tables and a generic Parquet writer. Pilot-specific business rules, provider mappings and universe-wide validation are still refined in the data-feasibility and audit stages.
 
 ## Planned schema family
 
-Schema version 1 is planned for entities/securities, identifier history, memberships, industry history, filings, facts, prices, corporate actions and gate results. Each table will define business keys, nullability, units, source identifiers and versioning before ingestion is enabled.
+`DOMAIN_SCHEMAS` defines schema version 1 for entities, securities, identifier history, memberships, industry history, filings, facts, prices, corporate actions and gate results. Every schema carries source identifiers and a schema version. Identifiers are strings so CIK leading zeros survive. Calendar dates are separate from timezone-aware UTC timestamps. Effective intervals use `[valid_from, valid_to)`; `known_at` represents when information became public and `retrieved_at` records collection time. Facts retain reported value text, unit and period context; derived numeric ratios are computed later. Missing values require a reason, and invalid rows are rejected with an explanation rather than silently dropped.
 
-Identifiers remain strings so CIK leading zeros survive. Calendar dates are separate from timezone-aware UTC timestamps. Effective intervals use `[valid_from, valid_to)`; `known_at` represents when information became public and `retrieved_at` records collection time. Facts retain reported value text, unit, scale and filing context; derived numeric ratios are computed later. Missing values require a reason, and invalid rows are quarantined with an explanation rather than silently dropped.
+The Stage 00 validators exercise duplicate business keys, non-overlapping identifier intervals, UTC timestamp schemas, fact units, explicit missing reasons, schema-version metadata and required lineage. Domain-specific checks such as filing amendments, price adjustment semantics and corporate-action reconciliation remain later-stage work.
 
 ## Stage 00 Parquet primitive
 
