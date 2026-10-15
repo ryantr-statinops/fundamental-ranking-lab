@@ -13,7 +13,7 @@ Ví dụ: 10-Q quý I kết thúc 31/3, filed 25/4 không được dùng ở ran
 
 ## Lịch hàng quý
 
-Cadence hàng quý. Chốt ngày rebalance, cutoff timestamp và timezone theo giờ thị trường Mỹ (ET); ngày cụ thể còn mở. Tại cutoff, dùng báo cáo mới nhất đã có của mỗi doanh nghiệp; không giả định mọi mã đã công bố cùng kỳ.
+Cadence hàng quý. Cutoff là ngày giao dịch cuối cùng của quý lúc 16:00 ET (giờ thị trường Mỹ); execution vào mở phiên giao dịch kế tiếp. Tại cutoff, dùng báo cáo mới nhất đã có của mỗi doanh nghiệp; không giả định mọi mã đã công bố cùng kỳ. Sample v1: 2010Q1–2025Q4.
 
 Tuổi dữ liệu và quy tắc staleness theo [02](02-universe-factors-ranking.md): carry-forward tối đa 2 quý, quá hạn coi là không có.
 
