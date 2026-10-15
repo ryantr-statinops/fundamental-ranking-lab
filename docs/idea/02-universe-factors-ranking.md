@@ -1,102 +1,64 @@
 # Universe, factors và ranking
 
-## Universe và 100 mã
+## Universe và thứ tự tính
 
-Universe xác định tại từng thời điểm; lọc bằng hard filters để tạo universe đủ điều kiện, tách khỏi candidate pool. Hard filters là pass/fail và tách khỏi fundamental score.
+Universe mục tiêu là cổ phiếu phổ thông Mỹ trên NYSE/NASDAQ/AMEX tại cutoff. Loại ETF, fund, preferred, warrant, ADR và OTC. REIT niêm yết là nhóm có cổng riêng. Một doanh nghiệp chỉ có một share class: chọn ADV 20 phiên USD lớn nhất bằng dữ liệu biết tại cutoff; ties theo security identifier tăng dần. CIK là identifier filer, không thay thế security identifier.
 
-Loại hard filter thuộc v1; ngưỡng v1 mặc định (xem lại khi có dữ liệu):
+Thứ tự: xác minh identity/listing/ngành và cổng nhóm → hard filters đầu tư → tính raw ratios/độ phủ → eligible universe → chuẩn hóa → composite → ranking. Không dùng composite làm điều kiện để xác định tập chuẩn hóa.
 
-- Dữ liệu đầy đủ: đủ để tính score so ngành (đạt ngưỡng độ phủ ≥ 3/4 trục).
-- Lịch sử tối thiểu: ≥ 8 quý báo cáo đã công bố.
-- Thanh khoản: ADV 20 ngày ≥ 1 triệu USD (dollar volume).
-- Trạng thái niêm yết: còn giao dịch tại cutoff (có giá).
-- Khả năng đầu tư: giá ≥ 1 USD; niêm yết NYSE/NASDAQ/AMEX (loại OTC/penny).
+Mặc định nghiên cứu: ít nhất 8 quý báo cáo đã công bố; ADV 20 phiên ≥ 1 triệu USD; giá đóng cửa chưa điều chỉnh ≥ 1 USD; đủ 20 phiên giá/volume và đang niêm yết/giao dịch tại cutoff. Có giá đơn lẻ không đủ chứng minh listing. Thiếu dữ liệu hard filter thì loại và ghi lý do.
 
-Candidate pool khoảng 100 mã lấy top-100 theo **score so ngành** (chuẩn hóa trên toàn universe đủ điều kiện). Lấy hết các mã bằng điểm ở vị trí thứ 100, nên số lượng có thể vượt 100. Nếu universe đủ điều kiện ít hơn 100 mã, lấy hết và chấp nhận số lượng biến động.
+Top-100 theo score lõi chung, lấy hết ties tại vị trí 100, không làm tròn score trước chọn; dưới 100 lấy hết. Universe trống thì danh mục toàn tiền mặt và ranking không khả dụng.
 
-Đánh giá ngành (Q2) tính trên universe đủ điều kiện, tách khỏi tập ứng viên. Nếu chỉ dùng 100 mã để so ngành thì phải gọi rõ là sức hấp dẫn của tập ứng viên trong ngành.
+## Factor dictionary lõi chung — mặc định cần pilot
 
-## Bốn trục
+Lõi tối thiểu dưới đây là đặc tả để kiểm chứng, chưa chứng minh tương đương trên mọi ngành. General và Utils cũng phải qua audit; không mặc định Finan tương đương vì cùng tên ratio. Không thêm/bớt ratios theo kết quả returns.
 
-Doanh nghiệp tốt chưa chắc là khoản đầu tư hấp dẫn tại mọi mức giá. Giữ chung bốn trục; ratios phù hợp từng ngành.
+Ký hiệu: NI = net income thuộc common shareholders; E = common equity; A = total assets; D = interest-bearing debt; M = tổng vốn hóa common share classes của doanh nghiệp tại cutoff. Flow là TTM; stock là cuối kỳ mới nhất. Average A/E là trung bình hai đầu khoảng TTM; không cộng dồn stock.
 
-### General (15 ngành còn lại)
+| Trục / ratio | Công thức | Chiều tốt | Period / đơn vị | Tag đầu vào us-gaap và fallback |
+|---|---|---|---|---|
+| Quality / ROA | NI / average A | cao | TTM / pure | NetIncomeLossAvailableToCommonStockholdersBasic; Assets |
+| Quality / ROE | NI / average E | cao | TTM / pure | NI như trên; StockholdersEquity trừ PreferredStockValue |
+| Growth / revenue | Revenue_TTM / Revenue_TTM_lag4 − 1 | cao | YoY TTM / pure | RevenueFromContractWithCustomerExcludingAssessedTax → Revenues → SalesRevenueNet |
+| Growth / earnings | NI_TTM / NI_TTM_lag4 − 1 | cao | YoY TTM / pure | NI như trên |
+| Financial Health / equity ratio | E / A | cao | instant / pure | E và Assets như trên |
+| Financial Health / debt ratio | D / A | thấp | instant / pure | LongTermDebtCurrent + LongTermDebtNoncurrent + ShortTermBorrowings; Assets |
+| Valuation / E/P | NI / M | cao | TTM + cutoff / pure | NI; common shares từng class × giá cutoff |
+| Valuation / B/P | E / M | cao | instant + cutoff / pure | E; M như trên |
 
-| Trục | Ratios (level, TTM) | Chiều tốt |
-|---|---|---|
-| Quality | Gross margin, Operating margin, ROE, CFO/NetIncome | cao |
-| Growth | Revenue growth, NetIncome growth, FCF growth, Δoperating margin | cao |
-| Financial Health | Net debt/EBITDA, Interest coverage, Current ratio, Debt/Equity | EBITDA và D/E thấp; coverage và current ratio cao |
-| Valuation | Earnings yield (E/P), FCF yield, EV/EBITDA, B/P | yield cao; EV/EBITDA thấp |
+Tag là ứng viên mapping có thứ tự ưu tiên, không bảo đảm mọi doanh nghiệp khai báo cùng tag. Chỉ fallback khi cùng scope, unit, period và ý nghĩa. NI fallback NetIncomeLoss trừ preferred dividends khi các thành phần đã xác minh; E fallback từ total equity chỉ khi chứng minh không có preferred. Không coi thành phần thiếu bằng 0 nếu filing không xác nhận không có. Debt phải tránh cộng trùng current debt/short-term borrowing; không xác minh được thì missing. Với M, không nhân giá một class với toàn bộ shares khác class; thiếu class data thì valuation missing. Shares dùng số lưu hành instant đã công bố, không dùng weighted-average diluted shares của EPS; lưu ngày shares và giá.
 
-### Finan (Banks, Insurance, Other Financials) — tách sub-block bằng SIC
+Mẫu số ≤ 0 là undefined, gồm nền YoY ≤ 0; ghi cờ negative_base. Tử số âm vẫn giữ nếu có ý nghĩa (NI âm tạo ROA/ROE/E/P âm). Raw USD phải cùng currency/unit; không tự trộn IFRS hoặc foreign currency. Không thay tăng trưởng từ nền âm bằng tỷ lệ giả. Growth dùng YoY; ba trục khác dùng level. Thay đổi level và gia tốc growth là phân tích phụ, không có level/change 50/50 trong score chính.
 
-| Sub-block | Quality | Financial Health | Valuation |
-|---|---|---|---|
-| Ngân hàng (SIC 60xx) | ROE, ROA, net margin | equity/assets, loan/deposit | E/P, B/P, dividend yield |
-| Bảo hiểm (SIC 63xx) | ROE, combined ratio | equity/assets | E/P, B/P, dividend yield |
-| REIT/real estate (SIC 65xx, 6798) | FFO/assets, FFO margin | Net debt/EBITDA, interest coverage | P/FFO, dividend yield, EV/EBITDA |
+## Score đặc thù và cổng nhóm
 
-Net debt/EBITDA và interest coverage không áp dụng cho ngân hàng và bảo hiểm.
+Các ratios dưới đây là backlog phân tích, chưa được vào score nếu chưa hoàn thiện dictionary như lõi chung (công thức/tag/fallback/period/direction/missing) và khóa version trước tính kết quả. Score đặc thù chưa đạt cổng là unavailable, không tự dùng block khác thay thế.
 
-### Utils
-
-| Trục | Ratios |
+| Nhóm | Checklist trước kích hoạt |
 |---|---|
-| Quality | ROE, Operating margin, CFO/NetIncome |
-| Growth | Revenue growth, EPS growth, dividend growth |
-| Financial Health | Net debt/EBITDA, interest coverage |
-| Valuation | E/P, EV/EBITDA, dividend yield, B/P |
+| General | gross/operating margin, CFO/NI, FCF growth/yield, net debt/EBITDA, interest coverage, current ratio, D/E, EV/EBITDA; xác minh capex, debt, EV và earnings âm |
+| Utils | ROE, operating margin, CFO/NI, revenue/EPS/dividend growth, coverage, leverage và yields; xác minh capex, regulated debt và dividend history |
+| Bank (SIC 60xx) | ROE/ROA, net margin, equity/assets, loan/deposit, earnings/revenue growth, E/P/B/P/dividend yield; chốt cách đo revenue và ý nghĩa leverage |
+| Insurance (63xx) | ROE, equity/assets, earnings/premium growth, yields; combined ratio chỉ áp cho nghiệp vụ phù hợp và có claims/expenses/premiums nhất quán |
+| REIT/real estate (65xx, 6798) | xác minh thực sự là REIT hay real estate; FFO/assets/margin, leverage, coverage, growth, P/FFO/yields; không coi NI + toàn bộ depreciation − gains là FFO đã chuẩn hóa |
+| Other Financials | SIC Finan còn lại cần phân loại nghiệp vụ và dictionary riêng; không tự ánh xạ sang bank/general |
 
-### Cấu trúc và xử lý
+Mỗi nhóm phải chứng minh ratios lõi có cùng ý nghĩa, raw facts truy nguyên và độ phủ trước khi vào ranking liên ngành. Thất bại thì giữ ngoài primary universe, báo rõ phạm vi bị loại. Trong Finan, checklist từng sub-block độc lập; không kích hoạt cả ngành khi chỉ một sub-block đạt. Mapping SIC dùng bảng Ken French có version; override 6798 vào REIT trước kiểm tra Other Financials.
 
-Mỗi trục gồm hai nhóm: level (TTM, 4 quý) và change (YoY, so cùng quý năm trước). Trong mỗi nhóm, các chỉ số equal-weight nội bộ; điểm trục là trung bình hai nhóm theo tỷ lệ 50/50. Change tính trên chỉ số gốc rồi mới chuẩn hóa. TTM và YoY giúp tránh seasonality.
+## Missing và chuẩn hóa
 
-Ratios tự tính từ EDGAR XBRL. REIT xấp xỉ FFO = Net Income + depreciation − gains; bỏ nếu thiếu. Ratio thiếu áp dụng missing policy ở phần "Thiết kế score".
+- Trục hợp lệ khi ≥ 50% số ratios lõi đã khóa có giá trị; composite cần ≥ 3/4 trục. Với 2 ratios/trục, 1 ratio hợp lệ đủ cho trục. Báo cấu hình độ phủ để nhận diện selection bias.
+- Structural N/A không tự bị loại khỏi mẫu số độ phủ lõi để “đạt cổng”; cần kiểm chứng lại thiết kế nhóm. Trong score đặc thù, mẫu số là bộ ratios áp dụng đã khóa cho nhóm.
+- Temporal missing: dùng phiên bản mới nhất đã biết. Carry-forward tối đa 2 quý lịch kể từ cutoff đầu tiên giá trị có thể dùng, đồng thời period end không quá 270 ngày trước cutoff; quá một giới hạn thì missing. Amendment không đặt lại tuổi period end. Không carry growth sang kỳ mới với nhãn period mới.
+- Trong trục lấy trung bình ratios hợp lệ; composite lấy trung bình các trục hợp lệ, reweight đều. Không impute số giả; lưu missing reason, tuổi dữ liệu và reweight flags.
+- Percentile goodness = (midrank − 1)/(n − 1), đảo chiều cho ratio thấp tốt; n = 1 cho 0,5, n = 0 unavailable. Lõi chuẩn hóa trên eligible universe cùng cutoff; score đặc thù trong nhóm nghiệp vụ đã khóa. Ties midrank. Scores thuộc [0,1].
+- Sensitivity: winsorize 1/99 rồi z-score bằng cross-section cùng cutoff; không thay cấu hình chính dựa final test.
 
-## Thiết kế score
+## Ranking ngành và output
 
-1. Chốt định nghĩa và chiều tốt/xấu của chỉ số.
-2. Xử lý missing, outliers, mẫu số âm/zero và staleness.
-3. Chuẩn hóa bằng dữ liệu biết được tại thời điểm đánh giá.
-4. Tổng hợp thành điểm từng trục (level/change 50/50).
-5. Kết hợp điểm tổng hợp; equal-weight cả trong trục và giữa bốn trục.
+Median composite lõi chung trên toàn eligible universe là điểm ngành; không dùng riêng candidate pool. Rank theo median cao trước, ties midrank. Không lấy trung bình scores đã chuẩn hóa riêng từng ngành để so ngành.
 
-Chuẩn hóa: percentile rank là chính trên cross-section tại cutoff. Đối chiếu độ bền bằng winsorize 1/99 rồi z-score.
+Báo cáo median từng trục, IQR, số eligible, tỷ lệ ratios hợp lệ, tỷ lệ đạt 3/4 trục trên tập đã qua hard filters đầu tư, tỷ lệ score ≥ median universe (breadth), số vào top-100 và thay đổi hạng/score. Mẫu số từng tỷ lệ phải xuất kèm. Ngành không có eligible member là unavailable và không nhận tilt. Quy mô thấp vẫn hiển thị kèm cờ, không tự suy ra độ tin cậy.
 
-Hai score tách biệt:
-
-- **Score so ngành:** chuẩn hóa trên toàn universe đủ điều kiện; dùng để rank ngành và chọn top-100.
-- **Score trong ngành:** chuẩn hóa riêng trong từng ngành; dùng để rank mã trong ngành.
-
-### Xử lý missing
-
-Phân biệt hai loại thiếu:
-
-- **Structural** (không áp dụng theo ngành): dùng lõi chung áp dụng mọi ngành cộng block riêng theo ngành; ratio không áp dụng bị loại khỏi trục và reweight phần còn lại.
-- **Temporal** (thiếu theo thời gian): carry-forward giá trị đã công bố mới nhất trong tối đa 2 quý; nếu vẫn thiếu thì bỏ ratio đó và reweight; không impute giá trị giả. Mẫu số âm/zero coi là không xác định.
-
-Ngưỡng độ phủ: trục có điểm nếu còn ít nhất 50% số ratio áp dụng có giá trị; score tổng hợp cần ít nhất 3/4 trục, dưới ngưỡng thì loại mã. Missing và N/A phân biệt rõ trong dữ liệu. Báo cáo độ phủ từng mã/ngành và đánh dấu mã dùng carry-forward hoặc reweight.
-
-## Ranking ngành
-
-Xếp hạng bằng score; p-value không phải điểm hấp dẫn. Median equal-weight là đại lượng chính; giữ điểm từng trục trước khi gộp.
-
-Báo cáo:
-
-- Sức mạnh: median composite score.
-- Chi tiết: median bốn trục riêng.
-- Đồng thuận: dispersion (IQR hoặc std của member scores).
-- Breadth: tỷ lệ mã trên median universe và tỷ lệ mã đạt ngưỡng chất lượng (composite score ≥ phân vị 50 universe).
-- Độ phủ: tỷ lệ ratio hợp lệ; tỷ lệ mã đủ 3/4 trục.
-- Quy mô: số mã eligible và số mã lọt top-100.
-- Động lượng: thay đổi hạng và median score so quý trước.
-- Ổn định: rank stability qua các quý (tùy chọn).
-
-Không chuẩn hóa tất cả scores trong từng ngành rồi lấy trung bình so ngành: có thể xóa khác biệt giữa ngành. Score so ngành và score trong ngành thiết kế riêng. Khi ratios khác nhau giữa ngành, phải làm rõ tính tương đương của điểm.
-
-Ngành chất lượng cao, cải thiện nhanh, định giá thấp và nhiều doanh nghiệp tốt là các khía cạnh riêng.
-
-## Trạng thái
-
-Mọi thành phần thiết kế trong file này đã chốt. Xem bảng trạng thái ở [06](06-open-decisions-references.md) và bảng tham số tổng hợp ở [07](07-spec-parameters.md).
+Trạng thái ở [06](06-open-decisions-references.md); thời gian ở [04](04-point-in-time-data.md).
