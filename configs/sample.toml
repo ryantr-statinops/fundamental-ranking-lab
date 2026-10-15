@@ -1,0 +1,17 @@
+[paths]
+data_dir = "data"
+artifact_dir = "artifacts"
+
+[provider]
+sec_user_agent_env = "FRL_SEC_USER_AGENT"
+price_provider = "yfinance"
+
+[research]
+timezone = "America/New_York"
+signal_start = "2010-01-01"
+signal_end = "2025-12-31"
+warmup_quarters = 12
+transaction_cost_bps_one_way = 10.0
+sector_cap = 0.20
+company_cap = 0.05
+sector_tilt_lambda = 0.5
