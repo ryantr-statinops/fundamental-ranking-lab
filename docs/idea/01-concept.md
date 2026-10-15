@@ -10,7 +10,7 @@ Fundamental score có giúp nhận diện cổ phiếu và ngành hấp dẫn, �
 | Q2 | Ngành điểm cao có outperform ngành điểm thấp? Tính trên universe đủ điều kiện. | Top-minus-comparison return |
 | Q3 | Danh mục có tạo giá trị sau chi phí so baseline? | Net/excess return |
 
-Horizon một quý là mặc định đề xuất; các horizon khác và nhóm đối chiếu chi tiết chốt ở [03](03-hypothesis-validation.md).
+Horizon một quý đã chốt; nhóm đối chiếu chi tiết ở [03](03-hypothesis-validation.md).
 
 “Tiềm năng” ở v1 nghĩa là hấp dẫn theo fundamentals tại thời điểm đánh giá. Khả năng sinh lời tương lai là giả thuyết cần kiểm chứng.
 
@@ -52,7 +52,7 @@ Thứ tự đã chốt: đánh giá ngành trên universe đủ điều kiện, 
 
 ## Phân ngành
 
-Dùng nhãn ngành có sẵn. v1 dùng một hệ thống phân ngành và một cấp; doanh nghiệp đa ngành xử lý theo quy tắc nhãn chính. Hệ thống, cấp phân ngành và quy tắc đa ngành cụ thể để mở, gắn với lựa chọn thị trường ở [06](06-open-decisions-references.md).
+Dùng nhãn ngành có sẵn. v1 chốt: Ken French 17 ngành, một cấp; doanh nghiệp đa ngành xử lý theo quy tắc nhãn chính (gắn với thị trường Mỹ ở [06](06-open-decisions-references.md)).
 
 Classification ML chỉ cần khi muốn dự đoán nhãn còn thiếu. Clustering tìm nhóm theo dữ liệu, không nhất thiết trùng ngành, là hướng mở rộng. Kiểm định không phải phương pháp phân cụm.
 
