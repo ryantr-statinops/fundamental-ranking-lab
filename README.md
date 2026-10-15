@@ -84,8 +84,13 @@ Pilot kiểm tra khả năng lấy và tính đúng dữ liệu; audit toàn uni
 
 ## Bản đồ tài liệu
 
+Bắt đầu tại [bản đồ docs](docs/README.md) để phân biệt nội dung nghiên cứu, kế hoạch, kỹ thuật, bằng chứng và hướng dẫn sử dụng. [Kế hoạch stage 00–07](docs/plan/README.md) chỉ rõ thứ tự triển khai; [kế hoạch bổ sung tài liệu](docs/plan/documentation-delivery.md) gắn từng tài liệu cần bàn giao với stage tương ứng.
+
 | Tài liệu | Đọc khi cần |
 |---|---|
+| [Technical](docs/technical/README.md) | Xem phạm vi tài liệu kiến trúc, data contracts, config/CLI và lineage dự kiến |
+| [Research](docs/research/README.md) | Xem cách ghi nhận bằng chứng, pilot, audit và kết quả thí nghiệm khi có |
+| [Guides](docs/guides/README.md) | Xem lộ trình hướng dẫn setup, configuration, pipeline và vận hành |
 | [Tổng quan bộ idea](docs/idea/README.md) | Theo dõi các quyết định thiết kế chính |
 | [Concept và output](docs/idea/01-concept.md) | Hiểu câu hỏi nghiên cứu, vai trò score và phạm vi v1 |
 | [Universe, factors và ranking](docs/idea/02-universe-factors-ranking.md) | Tra eligibility, factor dictionary, missing và chuẩn hóa |
