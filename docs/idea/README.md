@@ -20,8 +20,10 @@ Mỗi quý, sử dụng thông tin fundamental đã công bố để đánh giá
 - Hướng quant research; chọn khoảng 100 mã từ universe.
 - Nhóm theo ngành.
 - Bốn trục: Quality, Growth, Financial Health, Valuation.
-- Cập nhật hàng quý.
-- Factor ranking trước, ML ranking và ML reranking sau.
+- Cập nhật hàng quý; horizon một quý.
+- Phạm vi v1: factor ranking, ranking ngành/mã, portfolio và backtest; ML ranking/reranking để sau.
+- Chọn 100 mã bằng top-100 theo score so ngành từ universe đủ điều kiện.
+- Output mỗi quý gồm ranking ngành, khoảng 100 ứng viên, holdings và tỷ trọng.
 - Statistical inference là lớp kiểm chứng phương pháp.
 
-Chưa xác định thị trường, nguồn dữ liệu, benchmark, bộ ratios, trọng số và việc nắm giữ toàn bộ 100 mã hay chọn danh mục nhỏ hơn.
+Chưa xác định: thị trường và nguồn dữ liệu, hệ thống và cấp ngành, bộ ratios cụ thể, benchmark, quy tắc portfolio (holdings, weights, costs).

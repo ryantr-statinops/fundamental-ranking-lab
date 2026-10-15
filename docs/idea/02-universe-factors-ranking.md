@@ -2,37 +2,76 @@
 
 ## Universe và 100 mã
 
-Tách universe đủ điều kiện nghiên cứu khỏi candidate pool khoảng 100 mã. Hard filters có thể gồm dữ liệu đầy đủ, lịch sử tối thiểu, thanh khoản, trạng thái niêm yết và điều kiện đầu tư; ngưỡng chưa chốt.
+Universe xác định tại từng thời điểm; lọc bằng hard filters để tạo universe đủ điều kiện, tách khỏi candidate pool. Hard filters là pass/fail và tách khỏi fundamental score.
 
-Pass/fail theo ngưỡng tạo số mã thay đổi. Muốn đúng 100 mã cần top-100 và quy tắc ties, thiếu ứng viên. Fundamental score nên tách khỏi hard filters.
+Loại hard filter thuộc v1; ngưỡng cụ thể để mở ở [06](06-open-decisions-references.md):
 
-Nếu lọc fundamentals tốt rồi mới ranking ngành, kết luận chỉ đại diện các mã vượt bộ lọc. Đề xuất đánh giá ngành trên universe đủ điều kiện, trình bày riêng tập ứng viên; nếu chỉ dùng 100 mã thì gọi rõ là sức hấp dẫn của tập ứng viên trong ngành.
+- Dữ liệu đầy đủ cho các ratio bắt buộc.
+- Lịch sử tối thiểu.
+- Thanh khoản.
+- Trạng thái niêm yết.
+- Khả năng đầu tư.
+
+Candidate pool khoảng 100 mã lấy top-100 theo **score so ngành** (chuẩn hóa trên toàn universe đủ điều kiện). Lấy hết các mã bằng điểm ở vị trí thứ 100, nên số lượng có thể vượt 100. Nếu universe đủ điều kiện ít hơn 100 mã, lấy hết và chấp nhận số lượng biến động.
+
+Đánh giá ngành (Q2) tính trên universe đủ điều kiện, tách khỏi tập ứng viên. Nếu chỉ dùng 100 mã để so ngành thì phải gọi rõ là sức hấp dẫn của tập ứng viên trong ngành.
 
 ## Bốn trục
 
-| Trục | Câu hỏi | Chỉ số minh họa chưa chốt |
-|---|---|---|
-| Quality | Lợi nhuận/dòng tiền có chất lượng không? | ROIC/ROE, margins, cash flow so với earnings |
-| Growth | Kinh doanh có cải thiện không? | Revenue/earnings growth, thay đổi margin |
-| Financial Health | Bảng cân đối có vững không? | Leverage, interest coverage, liquidity |
-| Valuation | Giá hấp dẫn so với fundamentals không? | Earnings yield, FCF yield, bội số phù hợp ngành |
+Doanh nghiệp tốt chưa chắc là khoản đầu tư hấp dẫn tại mọi mức giá. Giữ chung bốn trục nhưng ratios phù hợp từng ngành, đặc biệt với ngân hàng. Bộ ratio cụ thể để mở theo thị trường.
 
-Doanh nghiệp tốt chưa chắc là khoản đầu tư hấp dẫn tại mọi mức giá. Giữ chung bốn trục nhưng ratios phù hợp từng ngành, đặc biệt với ngân hàng.
+| Trục | Câu hỏi | Level (TTM) | Change (YoY) |
+|---|---|---|---|
+| Quality | Lợi nhuận/dòng tiền có chất lượng không? | ROIC/ROE, margins, cash flow so với earnings | ΔROIC, Δmargin |
+| Growth | Kinh doanh có cải thiện không? | Tốc độ tăng trưởng hiện tại | Gia tốc tăng trưởng |
+| Financial Health | Bảng cân đối có vững không? | Leverage, interest coverage, liquidity | Δleverage, Δcoverage |
+| Valuation | Giá hấp dẫn so với fundamentals không? | Earnings yield, FCF yield, bội số phù hợp ngành | Thay đổi yield/bội số |
 
-## Thiết kế score đề xuất
+Mỗi trục gồm hai nhóm: level (TTM, 4 quý) và change (YoY, so cùng quý năm trước). Trong mỗi nhóm, các chỉ số equal-weight nội bộ; điểm trục là trung bình hai nhóm theo tỷ lệ 50/50. Change tính trên chỉ số gốc rồi mới chuẩn hóa. TTM và YoY giúp tránh seasonality.
+
+## Thiết kế score
 
 1. Chốt định nghĩa và chiều tốt/xấu của chỉ số.
 2. Xử lý missing, outliers, mẫu số âm/zero và staleness.
 3. Chuẩn hóa bằng dữ liệu biết được tại thời điểm đánh giá.
-4. Tổng hợp thành điểm từng trục.
-5. Kết hợp điểm tổng hợp; equal-weight là baseline đề xuất, chưa chốt.
+4. Tổng hợp thành điểm từng trục (level/change 50/50).
+5. Kết hợp điểm tổng hợp; equal-weight cả trong trục và giữa bốn trục.
 
-Phân biệt mức hiện tại và thay đổi theo thời gian; định nghĩa TTM, YoY, windows và seasonality.
+Chuẩn hóa: percentile rank là chính trên cross-section tại cutoff. Đối chiếu độ bền bằng winsorize 1/99 rồi z-score.
+
+Hai score tách biệt:
+
+- **Score so ngành:** chuẩn hóa trên toàn universe đủ điều kiện; dùng để rank ngành và chọn top-100.
+- **Score trong ngành:** chuẩn hóa riêng trong từng ngành; dùng để rank mã trong ngành.
+
+### Xử lý missing
+
+Phân biệt hai loại thiếu:
+
+- **Structural** (không áp dụng theo ngành): dùng lõi chung áp dụng mọi ngành cộng block riêng theo ngành; ratio không áp dụng bị loại khỏi trục và reweight phần còn lại.
+- **Temporal** (thiếu theo thời gian): carry-forward giá trị đã công bố mới nhất trong tối đa 2 quý; nếu vẫn thiếu thì bỏ ratio đó và reweight; không impute giá trị giả. Mẫu số âm/zero coi là không xác định.
+
+Ngưỡng độ phủ: trục có điểm nếu còn ít nhất 50% số ratio áp dụng có giá trị; score tổng hợp cần ít nhất 3/4 trục, dưới ngưỡng thì loại mã. Missing và N/A phân biệt rõ trong dữ liệu. Báo cáo độ phủ từng mã/ngành và đánh dấu mã dùng carry-forward hoặc reweight.
 
 ## Ranking ngành
 
-Báo cáo median scores, tỷ lệ mã vượt ngưỡng, dispersion và số mã; chốt aggregation/weighting để tránh vài mã chi phối.
+Xếp hạng bằng score; p-value không phải điểm hấp dẫn. Median equal-weight là đại lượng chính; giữ điểm từng trục trước khi gộp.
 
-Không chuẩn hóa tất cả scores trong từng ngành rồi lấy trung bình so ngành: có thể xóa khác biệt giữa ngành. Score so ngành và score chọn mã trong ngành cần thiết kế riêng. Khi ratios khác nhau giữa ngành, phải làm rõ tính tương đương của điểm.
+Báo cáo:
 
-Ranking bằng score; p-value không phải điểm hấp dẫn. Ngành chất lượng cao, cải thiện nhanh, định giá thấp và nhiều doanh nghiệp tốt là các khía cạnh riêng, nên giữ điểm từng trục trước khi gộp.
+- Sức mạnh: median composite score.
+- Chi tiết: median bốn trục riêng.
+- Đồng thuận: dispersion (IQR hoặc std của member scores).
+- Breadth: tỷ lệ mã trên median universe và tỷ lệ mã đạt ngưỡng chất lượng (theo phân vị, chốt con số sau).
+- Độ phủ: tỷ lệ ratio hợp lệ; tỷ lệ mã đủ 3/4 trục.
+- Quy mô: số mã eligible và số mã lọt top-100.
+- Động lượng: thay đổi hạng và median score so quý trước.
+- Ổn định: rank stability qua các quý (tùy chọn).
+
+Không chuẩn hóa tất cả scores trong từng ngành rồi lấy trung bình so ngành: có thể xóa khác biệt giữa ngành. Score so ngành và score trong ngành thiết kế riêng. Khi ratios khác nhau giữa ngành, phải làm rõ tính tương đương của điểm.
+
+Ngành chất lượng cao, cải thiện nhanh, định giá thấp và nhiều doanh nghiệp tốt là các khía cạnh riêng.
+
+## Điểm mở
+
+Ngưỡng hard filters, hệ thống và cấp ngành, bộ ratio cụ thể, và con số ngưỡng chất lượng để mở ở [06](06-open-decisions-references.md).

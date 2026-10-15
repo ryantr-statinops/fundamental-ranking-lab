@@ -5,15 +5,16 @@
 | Vấn đề | Trạng thái |
 |---|---|
 | Thị trường và data provider | Mở |
-| Universe, hard filters | Mở |
-| Top-100 cố định hay số pass thay đổi | Mở |
-| 100 ứng viên hay holdings cuối cùng | Mở |
-| Hệ thống/cấp ngành | Mở |
-| Ratios, missing, outliers, staleness | Mở |
-| Score so ngành/chọn mã | Mở |
-| Trọng số bốn trục | Equal-weight baseline đề xuất |
+| Universe, hard filters (ngưỡng) | Loại filter đã chốt; ngưỡng mở |
+| Chọn ~100 mã | Đã chốt: top-100 theo score so ngành, lấy hết ties |
+| 100 ứng viên hay holdings cuối cùng | Đã chốt: 100 mã là candidate pool; holdings theo 05 |
+| Hệ thống/cấp ngành | Mở (v1: một hệ thống, một cấp, nhãn chính) |
+| Missing, outliers, chuẩn hóa | Đã chốt: percentile rank chính; missing lõi chung + block ngành; carry-forward ≤ 2 quý; độ phủ 50%/3-of-4 |
+| Ratios cụ thể | Mở |
+| Score so ngành/chọn mã | Đã chốt: hai score tách biệt |
+| Trọng số bốn trục | Đã chốt: equal-weight cả hai cấp |
 | Cutoff và execution | Hàng quý đã chốt; ngày cụ thể mở |
-| Target horizon | Một quý đề xuất, chưa chốt |
+| Target horizon | Một quý (đề xuất) |
 | Benchmark, comparison portfolio | Mở |
 | Weights, constraints, costs | Mở |
 | Hypotheses, significance level, multiple testing | Mở |
