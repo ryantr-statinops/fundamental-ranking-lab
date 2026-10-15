@@ -10,7 +10,7 @@
 | 100 ứng viên hay holdings cuối cùng | Đã chốt: candidate pool ~100; holdings 30/50/100 |
 | Hệ thống/cấp ngành | Đã chốt: Ken French 17 ngành; nhãn chính |
 | Missing, outliers, chuẩn hóa | Đã chốt: percentile rank chính; missing lõi chung + block ngành; carry-forward ≤ 2 quý; độ phủ 50%/3-of-4 |
-| Ratios cụ thể | Mở |
+| Ratios cụ thể | Đã chốt: 4 ratio/trục general; Finan tách sub-block (bank/insurance/REIT); Utils riêng |
 | Score so ngành/chọn mã | Đã chốt: hai score tách biệt |
 | Trọng số bốn trục | Đã chốt: equal-weight cả hai cấp |
 | Cutoff và execution | Hàng quý đã chốt; ngày cụ thể mở |
