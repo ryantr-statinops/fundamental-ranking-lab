@@ -15,10 +15,10 @@
 | Trọng số bốn trục | Đã chốt: equal-weight cả hai cấp |
 | Cutoff và execution | Hàng quý đã chốt; ngày cụ thể mở |
 | Target horizon | Một quý (đề xuất) |
-| Benchmark, comparison portfolio | Mở |
-| Weights, constraints, costs | Mở |
-| Hypotheses, significance level, multiple testing | Mở |
-| Research/validation/test dates | Mở |
+| Benchmark, comparison portfolio | Benchmark chính đã chốt (universe equal-weight); comparison portfolio phụ mở |
+| Weights, constraints, costs | Mở (thuộc 05) |
+| Hypotheses, significance level, multiple testing | Đã chốt: một phía, α = 0.05, BH một family toàn study |
+| Research/validation/test dates | Cấu trúc đã chốt (60/20/20, embargo 1 quý); ngày cụ thể mở |
 
 ## Nguồn đã tham khảo
 
