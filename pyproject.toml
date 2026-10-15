@@ -1,0 +1,61 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fundamental-ranking-lab"
+version = "0.1.0"
+description = "A reproducible research lab for point-in-time fundamental equity ranking."
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+  "duckdb>=1.2,<2",
+  "exchange-calendars>=4.10,<5",
+  "httpx>=0.28,<1",
+  "numpy>=2.2,<3",
+  "pandas>=2.2,<4",
+  "pyarrow>=19,<25",
+  "pydantic>=2.11,<3",
+  "typer>=0.15,<1",
+  "tzdata>=2025.1",
+  "yfinance>=0.2.55,<2",
+]
+
+[project.optional-dependencies]
+analysis = [
+  "jinja2>=3.1,<4",
+  "matplotlib>=3.10,<4",
+  "scipy>=1.15,<2",
+  "statsmodels>=0.14,<1",
+]
+dev = [
+  "mypy>=1.15,<2",
+  "pytest>=8.3,<9",
+  "pytest-cov>=6,<7",
+  "ruff>=0.11,<1",
+]
+
+[project.scripts]
+frl = "fundamental_ranking_lab.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/fundamental_ranking_lab"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.13"
+mypy_path = "src"
+strict = true
+plugins = ["pydantic.mypy"]
+packages = ["fundamental_ranking_lab"]
