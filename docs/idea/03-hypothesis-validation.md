@@ -34,11 +34,11 @@ Excess return đơn giản không tự đồng nghĩa risk-adjusted alpha; alpha
 
 ## Thiết kế ngoài mẫu
 
-Chia theo thời gian: 60% research, 20% validation, 20% test. Embargo một quý ở ranh giới split để tránh chồng lấn label; horizon một quý và rebalance rời rạc nên yêu cầu nhẹ.
+Chia theo thời gian: 60% research, 20% validation, 20% test. Sample v1: 2010Q1–2025Q4 (EDGAR XBRL ổn định từ ~2009). Research 2010–2019, validation 2020–2022, test 2023–2025. Embargo một quý ở ranh giới split để tránh chồng lấn label; horizon một quý và rebalance rời rạc nên yêu cầu nhẹ.
 
 Khóa factors, trọng số, horizon và portfolio trước final test. Không chọn cấu hình bằng kết quả final test.
 
-Baselines: universe equal-weight (chính), danh mục cùng ngành/giới hạn rủi ro, danh mục ngẫu nhiên cùng cỡ.
+Baselines: universe equal-weight (chính), danh mục cùng ngành/giới hạn rủi ro, danh mục ngẫu nhiên cùng cỡ. Comparison portfolio phụ: nhóm score thấp cùng ngành (tercile bottom), cap-weight — công cụ nghiên cứu, không giao dịch short.
 
 ## Metrics
 
