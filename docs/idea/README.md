@@ -1,32 +1,34 @@
 # Idea: Fundamental Ranking Lab
 
-Ngày khởi tạo: 2026-10-14. Tài liệu ghi lại concept, đề xuất nghiên cứu và các quyết định thiết kế cho dự án.
+Khởi tạo 2026-10-14; cập nhật thiết kế 2026-10-15.
 
-## Mục tiêu
+**Trạng thái:** thiết kế nghiên cứu đã xác định; triển khai theo cổng kiểm chứng dữ liệu. Chưa thực hiện pilot, audit universe, pipeline hoặc backtest. Không coi các nguồn miễn phí là bảo đảm dữ liệu lịch sử hoàn chỉnh.
 
-Mỗi quý, sử dụng thông tin fundamental đã công bố để đánh giá ngành, chọn khoảng 100 cổ phiếu từ universe và xếp hạng nhằm phục vụ danh mục đầu tư. Kiểm chứng ngoài mẫu xem phương pháp có liên hệ với kết quả đầu tư tương lai hay không.
+## Mục tiêu và nội dung
 
-## Nội dung
+Mỗi quý dùng fundamentals đã công bố để rank cổ phiếu/ngành, tạo danh mục khoảng 100 mã và kiểm chứng Q1–Q3 ngoài mẫu.
 
 - [Concept và output](01-concept.md)
-- [Universe, factors và ranking](02-universe-factors-ranking.md)
+- [Universe, factor dictionary và ranking](02-universe-factors-ranking.md)
 - [Hypothesis testing và đánh giá](03-hypothesis-validation.md)
 - [Thông tin được phép dùng](04-point-in-time-data.md)
-- [Portfolio và lộ trình](05-portfolio-roadmap.md)
-- [Quyết định và nguồn](06-open-decisions-references.md)
+- [Portfolio, pilot và cổng triển khai](05-portfolio-roadmap.md)
+- [Trạng thái quyết định và nguồn](06-open-decisions-references.md)
 - [Bảng tham số tổng hợp](07-spec-parameters.md)
 
-## Đã xác định
+## Quyết định chính
 
-- Hướng quant research; chọn khoảng 100 mã từ universe.
-- Thị trường Mỹ; fundamentals SEC EDGAR (as-filed), giá yfinance/Stooq, ngành SEC SIC/Ken French, factor Ken French (free).
-- Nhóm theo ngành: Ken French 17 ngành; nhãn chính.
-- Bốn trục: Quality, Growth, Financial Health, Valuation; bộ ratio cụ thể cho general/Finan/Utils.
-- Cập nhật hàng quý; horizon một quý; cutoff ngày giao dịch cuối quý 16:00 ET, execution mở phiên kế tiếp.
-- Phạm vi v1: factor ranking, ranking ngành/mã, portfolio và backtest; ML ranking/reranking để sau.
-- Chọn 100 mã bằng top-100 theo score so ngành từ universe đủ điều kiện.
-- Output mỗi quý gồm ranking ngành, khoảng 100 ứng viên, holdings và tỷ trọng.
-- Statistical inference là lớp kiểm chứng phương pháp; một phía, α = 0.05, hiệu chỉnh Benjamini–Hochberg.
-- Sample 2010Q1–2025Q4; research 2010–2019, validation 2020–2022, test 2023–2025.
+- Mỹ, USD, dữ liệu miễn phí; SEC EDGAR as-filed, giá yfinance/Stooq cần audit; SIC lịch sử ánh xạ Ken French 17.
+- Lõi chung cho so ngành/top-100/weights; ratios đặc thù cho ranking trong nhóm. Chưa đạt dictionary/cổng thì unavailable.
+- Quality, Financial Health, Valuation dùng level; Growth dùng YoY. Percentile và equal-weight; không level/change 50/50 áp đồng loạt.
+- Top-100 lấy hết ties; dưới 100 lấy hết. Score-weight + tilt λ=0,5; caps ngành 20%, doanh nghiệp 5%; dư tiền mặt lợi suất 0%, tính vào NAV.
+- Rebalance đầy đủ mỗi quý; chi phí 10 bps một chiều, sensitivity 0/25/50. Chưa gắn vốn hoặc kết luận capacity.
+- Cutoff cuối quý 16:00 America/New_York, next-open execution. Date-only filing chỉ nhận từ ngày trước cutoff.
+- Tín hiệu mục tiêu 2010Q1–2025Q4, outcome tới open quý II/2026; split research/validation/test theo 03, chờ audit khả thi.
+- Primary Q1 Fama–MacBeth slope, Q2 spread ngành, Q3 net excess; BH cho 3 primary tests; phân tích phụ đăng ký riêng. Không tuning final test.
 
-Bảng trạng thái đầy đủ ở [06](06-open-decisions-references.md); tham số tổng hợp ở [07](07-spec-parameters.md). Bộ spec đã đầy đủ để triển khai.
+## Bước tiếp theo và giới hạn
+
+Đặc tả pilot 40 doanh nghiệp × 4 cutoff lịch sử, manual reconciliation ≥ 10 doanh nghiệp; từng nhóm có cổng riêng. Sau đó audit toàn universe trước primary backtest. Bank/insurance/REIT/Other Financials không tự vào kết quả chính khi thiếu dữ liệu hoặc chưa chứng minh lõi tương đương.
+
+Spec tách đã chốt, mặc định nghiên cứu, chờ kiểm chứng và hoãn. Caps 20%/5% là lựa chọn kiểm soát tập trung, chưa chứng minh tối ưu. Giá/event unresolved chặn primary performance; không mặc định −100% cho giá thiếu. Nghiên cứu có thể kết luận âm hoặc chưa đủ bằng chứng; ML và quyết định dùng vốn thực để sau.
