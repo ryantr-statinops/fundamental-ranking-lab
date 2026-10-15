@@ -19,3 +19,11 @@ def test_doctor_reports_invalid_config(tmp_path: Path) -> None:
     result = CliRunner().invoke(app, ["doctor", "--config", str(invalid)])
     assert result.exit_code == 1
     assert "FAIL config:" in result.output
+
+
+def test_doctor_does_not_print_provider_contact(sample_config_path: Path, monkeypatch) -> None:
+    secret_contact = "private-contact@example.invalid"
+    monkeypatch.setenv("FRL_SEC_USER_AGENT", secret_contact)
+    result = CliRunner().invoke(app, ["doctor", "--config", str(sample_config_path)])
+    assert result.exit_code == 0
+    assert secret_contact not in result.output
