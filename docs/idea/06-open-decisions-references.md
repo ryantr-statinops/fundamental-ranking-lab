@@ -4,19 +4,20 @@
 
 | Vấn đề | Trạng thái |
 |---|---|
-| Thị trường và data provider | Mở |
+| Thị trường và data provider | Đã chốt: Mỹ; fundamentals SEC EDGAR (as-filed), giá yfinance/Stooq, ngành SEC SIC/Ken French, factor Ken French (free) |
 | Universe, hard filters (ngưỡng) | Loại filter đã chốt; ngưỡng mở |
 | Chọn ~100 mã | Đã chốt: top-100 theo score so ngành, lấy hết ties |
-| 100 ứng viên hay holdings cuối cùng | Đã chốt: 100 mã là candidate pool; holdings theo 05 |
-| Hệ thống/cấp ngành | Mở (v1: một hệ thống, một cấp, nhãn chính) |
+| 100 ứng viên hay holdings cuối cùng | Đã chốt: candidate pool ~100; holdings 30/50/100 |
+| Hệ thống/cấp ngành | Đã chốt: Ken French 17 ngành; nhãn chính |
 | Missing, outliers, chuẩn hóa | Đã chốt: percentile rank chính; missing lõi chung + block ngành; carry-forward ≤ 2 quý; độ phủ 50%/3-of-4 |
 | Ratios cụ thể | Mở |
 | Score so ngành/chọn mã | Đã chốt: hai score tách biệt |
 | Trọng số bốn trục | Đã chốt: equal-weight cả hai cấp |
 | Cutoff và execution | Hàng quý đã chốt; ngày cụ thể mở |
+| Delisting return | Đã chốt: −100% khi thiếu giá |
 | Target horizon | Một quý (đề xuất) |
 | Benchmark, comparison portfolio | Benchmark chính đã chốt (universe equal-weight); comparison portfolio phụ mở |
-| Weights, constraints, costs | Mở (thuộc 05) |
+| Weights, constraints, costs | Đã chốt: score-weight mặc định + cap-weight; trần mã 10% / ngành 25%; no-trade band 1%; component cost |
 | Hypotheses, significance level, multiple testing | Đã chốt: một phía, α = 0.05, BH một family toàn study |
 | Research/validation/test dates | Cấu trúc đã chốt (60/20/20, embargo 1 quý); ngày cụ thể mở |
 
