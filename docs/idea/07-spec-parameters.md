@@ -68,12 +68,12 @@ Gom toàn bộ tham số đã chốt của v1 để tra cứu một chỗ. Giá 
 |---|---|
 | Holdings | 30/50/100 (cấu hình) |
 | Chọn holdings | subset của candidate pool |
-| Tilt ngành | theo rank ngành (λ, giới hạn) + trần ngành |
+| Tilt ngành | hệ số theo rank ngành; λ ∈ [0, 1], mặc định 0.5; + trần ngành |
 | Trọng số mặc định | score-weight (biến thể cap-weight) |
 | Trần mã | 10% |
 | Trần ngành | 25% |
 | No-trade band | 1% |
-| Chi phí | commission + spread + impact |
+| Chi phí | commission 0.5 bps; spread = nửa bid-ask; impact = hệ số × sqrt(participation) |
 | Delisting return | −100% khi thiếu giá |
 
 ## Kiểm định
