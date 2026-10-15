@@ -8,7 +8,7 @@ v1 thử số holdings ở các mức **30, 50 và 100** để so độ tập tr
 
 ## Ảnh hưởng của ranking ngành
 
-Ranking ngành thay đổi tỷ trọng holdings: weight của mỗi mã nhân với hệ số theo hạng ngành (có biên và tham số λ), rồi chuẩn hóa lại. Áp trần tỷ trọng ngành để tránh tập trung. Tham số λ để mở và thử ở giai đoạn validation.
+Ranking ngành thay đổi tỷ trọng holdings: weight của mỗi mã nhân với hệ số theo hạng ngành (có biên), rồi chuẩn hóa lại. Áp trần tỷ trọng ngành để tránh tập trung. λ có biên [0, 1], mặc định 0.5; tinh chỉnh ở giai đoạn validation.
 
 Ranking tốt vẫn có thể gây tập trung ngành; trần tỷ trọng và tilt cần được kiểm tra cùng nhau.
 
@@ -23,12 +23,12 @@ Ranking tốt vẫn có thể gây tập trung ngành; trần tỷ trọng và t
 ## Turnover và chi phí
 
 - **No-trade band**: chỉ giao dịch khi tỷ trọng lệch khỏi target quá 1%, nhằm giảm turnover.
-- **Chi phí theo component model**: commission + spread + market impact. Tham số cụ thể để mở, gắn với thị trường ở [06](06-open-decisions-references.md).
+- **Chi phí theo component model**: commission + spread + market impact. v1 default: commission 0.5 bps; spread = nửa bid-ask tại cutoff; impact = hệ số × sqrt(participation); tinh chỉnh khi có dữ liệu.
 - Báo cáo turnover mỗi kỳ và tổng chi phí.
 
 ## Mốc đề xuất
 
-1. **Research specification:** đã xong; thị trường và data cụ thể còn lại ở [06](06-open-decisions-references.md).
+1. **Research specification:** đã xong; tham số cụ thể ở [06](06-open-decisions-references.md) và [07](07-spec-parameters.md).
 2. **Data + factor baseline:** snapshots point-in-time, hard filters, scores, ranking ngành/mã; xuất lịch sử 100 ứng viên và lý do chọn/loại.
 3. **Portfolio + validation:** weights, execution, costs, backtest, attribution ngành/mã, metrics và inference ngoài mẫu.
 4. **ML ranking:** học từ features theo target tương lai. Ngày rebalance là ranking group. Có thể dùng LightGBM LambdaRank với labels nguyên không âm; so regression-then-sort và factor baseline.
