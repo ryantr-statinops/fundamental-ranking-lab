@@ -1,13 +1,13 @@
 # Bằng chứng và kết quả nghiên cứu
 
-Mục này lưu diễn giải, bằng chứng và giới hạn của những gì đã kiểm tra. **Chưa có pilot, audit, thí nghiệm hoặc performance report.** Các file dưới đây là kế hoạch bàn giao, không phải kết quả đã có.
+Mục này lưu diễn giải, bằng chứng và giới hạn của những gì đã kiểm tra. Đã có một lần chạy pilot blocked và replay offline; chưa có SEC raw thực, snapshot thực, đối chiếu người kiểm tra, audit universe hay performance result. Xem [source assessment](source-assessment.md) và [pilot findings](pilot-findings.md).
 
 ## Kế hoạch nội dung
 
 | File dự kiến | Nội dung | Stage |
 |---|---|---|
-| `source-assessment.md` | Đánh giá nguồn: truy cập, coverage lịch sử, listing/delisting, shares/events, provenance và điều kiện sử dụng đã kiểm tra | 01; mở rộng 02 |
-| `pilot-findings.md` | Roster version, coverage 160 cells, reconciliation, pass/block từng nhóm và blockers | 01 |
+| [source-assessment.md](source-assessment.md) | Desk review và các tình trạng nguồn chưa được đo bằng ingestion thật | 01; mở rộng 02 |
+| [pilot-findings.md](pilot-findings.md) | Run blocked, coverage 160 cells, replay hashes và blockers | 01 |
 | `universe-audit.md` | Historical evidence, discrepancies, missing denominators, sample/scope manifest và kết luận completeness | 02 |
 | `experiment-register.md` | Registry nghiên cứu: câu hỏi, primary/secondary, split, frozen manifest và lịch sử xem test | 06, trước final test |
 | `validation-findings.md` | Kết quả Q1–Q3, ablations, CI/p-values, cash/cost/risk, giới hạn power và kết luận | 06 |
