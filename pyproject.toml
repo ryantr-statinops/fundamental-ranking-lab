@@ -9,6 +9,7 @@ description = "A reproducible research lab for point-in-time fundamental equity 
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
 dependencies = [
+  "lxml>=6,<7",
   "duckdb>=1.2,<2",
   "exchange-calendars>=4.10,<5",
   "httpx>=0.28,<1",
