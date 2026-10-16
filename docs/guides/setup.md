@@ -8,6 +8,6 @@ uv sync --locked --extra dev
 uv run frl doctor --config configs/sample.toml
 ```
 
-The `.python-version` and `pyproject.toml` constrain the runtime. `uv.lock` records resolved versions. Keep `.venv`, `.cache`, local datasets and generated artifacts out of commits; `.gitignore` already excludes them. Do not put a SEC contact, token or other secret in the sample config. Set the contact in the environment variable named by the provider config only when a later data command needs it.
+The `.python-version` and `pyproject.toml` constrain the runtime. `uv.lock` records resolved versions. Keep `.venv`, `.cache`, local datasets and generated artifacts out of commits; `.gitignore` already excludes them. Do not put a SEC contact, token or other secret in the sample config. For real Stage 01 collection, configure the environment variable named in `configs/pilot.toml` as described in [running pipeline](running-pipeline.md). A real contact is required; never use a fabricated address for requests.
 
-For an editable development loop, change package files under `src/`, add offline fixtures under `tests/`, then run the checks listed in the root README. No network-backed data command is part of Stage 00.
+For an editable development loop, change package files under `src/`, add offline fixtures under `tests/`, then run the checks listed in the root README. Live Stage 01 collection is separate from the default offline CI suite.
