@@ -25,6 +25,18 @@ class RunManifest(BaseModel):
     code_revision: str
     input_artifacts: dict[str, str] = Field(default_factory=dict)
     output_artifacts: dict[str, str] = Field(default_factory=dict)
+    manifest_version: int = 1
+    execution_sha256: str | None = None
+    code_sha256: str | None = None
+    lockfile_sha256: str | None = None
+    tool_versions: dict[str, str] = Field(default_factory=dict)
+    schema_versions: dict[str, str] = Field(default_factory=dict)
+    factor_version: str | None = None
+    mapping_version: str | None = None
+    parent_run: str | None = None
+    status: str = "recorded"
+    exit_code: int | None = None
+    content_hashes: dict[str, str] = Field(default_factory=dict)
 
     @field_validator("created_at_utc")
     @classmethod
