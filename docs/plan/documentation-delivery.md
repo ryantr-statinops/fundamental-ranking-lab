@@ -1,6 +1,6 @@
 # Kế hoạch bổ sung và bàn giao tài liệu
 
-Ngày lập: 2026-10-16. Trạng thái: đã tổ chức mục tài liệu và ghi backlog; tài liệu implementation/evidence/guides bên dưới chưa được thực hiện.
+Ngày lập: 2026-10-16. Trạng thái: đã tổ chức mục tài liệu; technical references, Stage 01 source assessment, blocked pilot findings và running guide đã được cập nhật theo implementation. Các file còn lại vẫn theo backlog stage.
 
 Đây là workstream xuyên suốt [stage 00–07](README.md), không phải stage 08 và không phải điều kiện để viết sẵn toàn bộ docs trước code. Mục tiêu: kết thúc mỗi stage có đủ tài liệu giải thích hệ thống đã xây, bằng chứng đã thu và cách sử dụng đã kiểm tra.
 
@@ -59,7 +59,7 @@ Thay đổi research rule quay về idea và sổ quyết định; thay implemen
 
 ## Nghiệm thu và Git
 
-- Đợt tổ chức hiện tại: đủ 5 nhóm tài liệu có index, root/plan dẫn được tới bản đồ, mọi local link tồn tại, planned filenames không thành broken links, trạng thái chưa code/pilot được giữ nguyên.
+- Đợt tổ chức ban đầu: đủ 5 nhóm tài liệu có index, root/plan dẫn được tới bản đồ và mọi local link tồn tại. Các trạng thái cập nhật theo implementation của Stage 00–01; planned filenames không được mô tả như code hoặc evidence đã hoàn thành.
 - Mỗi stage sau: không có hướng dẫn command chưa tồn tại; schema/options khớp code, example đã chạy và có test/manifest evidence. Kiểm tra Markdown links, tables, whitespace và secrets trước commit.
 - Tài liệu không được gọi verified chỉ vì file có nội dung; planned/implemented/verified được đánh giá riêng cho từng phần nếu file phục vụ nhiều stage.
 - Làm trên main theo yêu cầu hiện tại: kiểm tra branch/remote/working tree; mỗi file một commit, kiểm tra staged diff rồi push origin main trước chuyển file tiếp. Không stage changes ngoài phạm vi, không force-push; push lỗi/diverged thì dừng để kiểm tra.
