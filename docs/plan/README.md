@@ -1,13 +1,13 @@
 # Kế hoạch thực thi Fundamental Ranking Lab
 
-Ngày lập: 2026-10-15. Bộ tài liệu này chuyển [research specification](../idea/README.md) thành các stage thực thi. Hiện chỉ có kế hoạch; chưa triển khai stack, pilot hoặc backtest. Các lệnh CLI trong bộ plan là giao diện cần xây dựng, chưa có sẵn để chạy.
+Ngày lập: 2026-10-15; cập nhật: 2026-10-16. Bộ tài liệu này chuyển [research specification](../idea/README.md) thành các stage thực thi. Stage 00 đã đạt cổng nền tảng. Stage 01 đã có implementation và chạy offline; feasibility pilot vẫn bị chặn vì chưa cấu hình contact SEC và chưa có dữ liệu/đối chiếu thực. Backtest chưa triển khai.
 
 ## Thứ tự và phụ thuộc
 
 | Stage | Kế hoạch | Phụ thuộc | Trạng thái |
 |---|---|---|---|
-| 00 | [Nền tảng kỹ thuật](00-technical-foundation.md) | Bộ idea hiện tại | Chưa bắt đầu |
-| 01 | [Pilot khả thi dữ liệu](01-data-feasibility-pilot.md) | 00 | Chưa bắt đầu |
+| 00 | [Nền tảng kỹ thuật](00-technical-foundation.md) | Bộ idea hiện tại | Đạt cổng nền tảng |
+| 01 | [Pilot khả thi dữ liệu](01-data-feasibility-pilot.md) | 00 | Đang triển khai; pilot thật bị chặn |
 | 02 | [Dữ liệu lịch sử và universe](02-historical-data-universe.md) | 01: nhóm/nguồn đạt cổng | Chưa bắt đầu |
 | 03 | [Point-in-time và features](03-point-in-time-features.md) | 02: manifest phạm vi đã khóa | Chưa bắt đầu |
 | 04 | [Ranking baseline](04-ranking-baseline.md) | 03 | Chưa bắt đầu |
@@ -19,7 +19,7 @@ Ngày lập: 2026-10-15. Bộ tài liệu này chuyển [research specification]
 
 ## Bàn giao tài liệu theo stage
 
-[Kế hoạch bổ sung tài liệu](documentation-delivery.md) phân công nội dung technical, research và guides cho từng stage, với file dự kiến và tiêu chí nghiệm thu. Đây là công việc xuyên suốt 00–07, không phải stage mới thực hiện sau 07. [Bản đồ docs](../README.md) là điểm vào chung; các README nhóm hiện mới ghi mục đích/backlog, chưa xác nhận đã có implementation hoặc kết quả.
+[Kế hoạch bổ sung tài liệu](documentation-delivery.md) phân công nội dung technical, research và guides cho từng stage, với file dự kiến và tiêu chí nghiệm thu. Đây là công việc xuyên suốt 00–07, không phải stage mới thực hiện sau 07. [Bản đồ docs](../README.md) là điểm vào chung; các README nhóm phân biệt implementation và kết quả đã quan sát.
 
 Stage 00 bắt đầu technical references và setup/config guides cùng code; stage 01–02 ghi bằng chứng pilot/nguồn/universe; stage 04–06 bổ sung hướng dẫn đọc kết quả và study findings; stage 07 hoàn thiện quarterly/backup runbooks. Không tạo sẵn hàng loạt hướng dẫn chạy khi commands chưa tồn tại.
 
@@ -34,7 +34,7 @@ Stage 00 bắt đầu technical references và setup/config guides cùng code; s
 
 Mỗi stage có đầu vào, công việc, hợp đồng đầu ra, kiểm tra nghiệm thu và điều kiện dừng. Chỉ đổi trạng thái sang hoàn tất khi có artifact cùng đường dẫn/run_id, kết quả kiểm tra và ghi chú giới hạn. Trạng thái dùng: chưa bắt đầu → đang làm → đạt cổng; hoặc bị chặn kèm bằng chứng và việc cần giải quyết. Không gọi code chạy được là đã đạt cổng dữ liệu.
 
-Mỗi run lưu manifest gồm git commit, lockfile hash, Python version, config/schema/factor/mapping versions, input checksums, cutoffs, seed, artifacts và gate results. Dữ liệu gốc bất biến; kết quả cũ không bị overwrite. Network ingestion và biến đổi offline tách riêng để tái lập.
+Mỗi run lưu manifest gồm git commit, hash mã nguồn đang chạy, lockfile hash, Python/uv versions, config/schema/factor/mapping versions, input checksums, cutoffs, artifacts và gate results. Dữ liệu gốc bất biến; kết quả cũ không bị overwrite. Network ingestion và biến đổi offline tách riêng để tái lập.
 
 Primary giữ theo idea: top-100 gồm ties, score lõi + tilt λ=0,5, caps ngành 20%/doanh nghiệp 5%, phần dư giữ cash với lợi suất 0%, phí 10 bps một chiều; không tuning final test. Ngành không qua cổng không tự tham gia. Giá/event chưa giải quyết chặn kết luận performance liên quan.
 
