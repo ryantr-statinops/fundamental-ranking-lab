@@ -1,10 +1,10 @@
 # Tài liệu kỹ thuật
 
-Mục này mô tả thiết kế kỹ thuật và hệ thống thực tế khi được triển khai. Hiện chỉ có kế hoạch; chưa có package Python, schema code hoặc CLI. Stack được chọn xem ở [stage 00](../plan/00-technical-foundation.md), công thức nghiên cứu nằm trong [idea](../idea/README.md).
+Mục này mô tả thiết kế và hành vi đã triển khai theo stage. Stage 00 nền tảng đã qua; Stage 01 có package pilot và CLI, nhưng chưa xác nhận khả thi dữ liệu thật. Stack được chọn xem ở [stage 00](../plan/00-technical-foundation.md), công thức nghiên cứu nằm trong [idea](../idea/README.md).
 
 ## Kế hoạch nội dung
 
-Tên file dưới đây là dự kiến, chưa phải tài liệu đã tồn tại. Tiêu chí chi tiết nằm trong [kế hoạch bàn giao](../plan/documentation-delivery.md).
+Các file dưới đây là technical references hiện có; mỗi file phân biệt code chạy được với data gate chưa đạt. Tiêu chí chi tiết nằm trong [kế hoạch bàn giao](../plan/documentation-delivery.md).
 
 | File dự kiến | Nội dung | Bắt đầu / hoàn thiện |
 |---|---|---|
