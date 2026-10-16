@@ -2,7 +2,7 @@
 
 Nghiên cứu định lượng về việc sử dụng dữ liệu tài chính doanh nghiệp để xếp hạng cổ phiếu và ngành tại thị trường Mỹ, xây dựng danh mục cập nhật hàng quý và kiểm chứng hiệu quả ngoài mẫu sau chi phí.
 
-**Trạng thái: thiết kế nghiên cứu đã xác định; bước tiếp theo là kiểm chứng dữ liệu.** Repository chứa tài liệu nghiên cứu và foundation code của Stage 00. Pipeline dữ liệu/nghiên cứu, pilot và backtest chưa hoàn thành; chưa có kết quả performance. Tên dự án là tên tạm thời.
+**Trạng thái: Stage 00 đạt cổng; Stage 01 đang triển khai và pilot dữ liệu thật bị chặn.** Repository có foundation code, CLI pilot và offline replay. Run hiện tại ghi đủ 160 cells nhưng chưa có snapshot thật vì chưa cấu hình SEC contact; roster vẫn là ứng viên và chưa đối chiếu độc lập. Chưa có ranking, portfolio, backtest hay performance result. Tên dự án là tên tạm thời.
 
 ## Mục tiêu nghiên cứu
 
@@ -74,7 +74,7 @@ Trần 20%/5% và các tham số khác là mặc định nghiên cứu, chưa đ
 | Giai đoạn | Kết quả cần đạt | Trạng thái |
 |---|---|---|
 | Thiết kế nghiên cứu | Câu hỏi, quy tắc, tham số và tiêu chí kiểm chứng được ghi rõ | Đã ghi nhận; một số giả định chờ kiểm chứng |
-| Pilot dữ liệu | 40 doanh nghiệp × 4 cutoff cuối năm 2012/2018/2022/2025; đối chiếu filing gốc ít nhất 10 doanh nghiệp | Tiếp theo |
+| Pilot dữ liệu | 40 doanh nghiệp × 4 cutoff cuối năm 2012/2018/2022/2025; đối chiếu filing gốc ít nhất 10 doanh nghiệp | Code/replay offline có; ingestion và cổng dữ liệu bị chặn |
 | Audit universe | Xác minh membership, identity, ngành, giá và corporate actions trên sample | Chưa thực hiện |
 | Pipeline và baseline | Tái lập snapshots, scores, ranking và danh mục | Chưa triển khai |
 | Validation và final test | Báo cáo ngoài mẫu, độ bất định và kết luận Q1–Q3 | Chưa thực hiện |
@@ -88,9 +88,9 @@ Bắt đầu tại [bản đồ docs](docs/README.md) để phân biệt nội d
 
 | Tài liệu | Đọc khi cần |
 |---|---|
-| [Technical](docs/technical/README.md) | Xem phạm vi tài liệu kiến trúc, data contracts, config/CLI và lineage dự kiến |
-| [Research](docs/research/README.md) | Xem cách ghi nhận bằng chứng, pilot, audit và kết quả thí nghiệm khi có |
-| [Guides](docs/guides/README.md) | Xem lộ trình hướng dẫn setup, configuration, pipeline và vận hành |
+| [Technical](docs/technical/README.md) | Xem kiến trúc, data contracts, config/CLI và lineage đã triển khai |
+| [Research](docs/research/README.md) | Xem source assessment, blocked pilot, audit và giới hạn kết luận |
+| [Guides](docs/guides/README.md) | Cài môi trường, cấu hình contact và chạy/replay pilot |
 | [Tổng quan bộ idea](docs/idea/README.md) | Theo dõi các quyết định thiết kế chính |
 | [Concept và output](docs/idea/01-concept.md) | Hiểu câu hỏi nghiên cứu, vai trò score và phạm vi v1 |
 | [Universe, factors và ranking](docs/idea/02-universe-factors-ranking.md) | Tra eligibility, factor dictionary, missing và chuẩn hóa |
@@ -102,7 +102,7 @@ Bắt đầu tại [bản đồ docs](docs/README.md) để phân biệt nội d
 
 ## Bắt đầu phát triển
 
-Stage 00 đang dựng nền tảng kỹ thuật. Máy phát triển cần CPython 3.13 và [`uv`](https://docs.astral.sh/uv/). Từ thư mục gốc, cài môi trường đã khóa và chạy kiểm tra offline:
+Stage 00 nền tảng đã hoàn tất. Máy phát triển cần CPython 3.13 và [`uv`](https://docs.astral.sh/uv/). Từ thư mục gốc, cài môi trường đã khóa và chạy kiểm tra offline:
 
 ```powershell
 uv python install 3.13
@@ -114,6 +114,6 @@ uv run ruff format --check .
 uv run mypy src
 ```
 
-`frl doctor` chỉ đọc runtime và config; chưa tải dữ liệu hay gọi provider. Xem [hướng dẫn setup](docs/guides/setup.md), [configuration](docs/guides/configuration.md) và [technical architecture](docs/technical/architecture.md). Pipeline nghiên cứu vẫn chưa được triển khai; các lệnh ingest, ranking và backtest chưa khả dụng.
+`frl doctor` chỉ đọc runtime và config. Lệnh pilot đã có nhưng lần chạy live hiện chưa thể gọi SEC cho tới khi bạn thiết lập contact local; cách làm và replay ghi ở [hướng dẫn chạy pipeline](docs/guides/running-pipeline.md). Ranking, portfolio và backtest chưa khả dụng. Xem thêm [hướng dẫn setup](docs/guides/setup.md), [configuration](docs/guides/configuration.md), [technical architecture](docs/technical/architecture.md) và [pilot findings](docs/research/pilot-findings.md).
 
 Khi thay đổi thiết kế, cập nhật tài liệu nguồn trong `docs/idea`, sổ quyết định và bảng tham số; README này giữ vai trò tổng quan.
