@@ -1,6 +1,6 @@
 # Hướng dẫn sử dụng và vận hành
 
-Mục này dành cho người cần cài môi trường, chạy pipeline và xử lý sự cố. Hiện chưa có code/CLI để chạy; chưa có hướng dẫn thao tác được kiểm chứng. Không thực hiện các commands dự kiến trong plan như thể chúng đã tồn tại.
+Mục này dành cho người cần cài môi trường, chạy pilot và xử lý sự cố. Hướng dẫn được đánh dấu theo đúng mức đã kiểm chứng; pilot có đường offline và live collection còn phụ thuộc contact SEC cùng roster evidence.
 
 Dùng tên `guides/` cho cả hướng dẫn sử dụng và vận hành v1; không tạo thêm thư mục `operations/` có nội dung trùng lặp. File cấu hình thực tế sẽ nằm ở `configs/` root; tài liệu configuration ở đây giải thích cách dùng.
 
@@ -10,8 +10,8 @@ Dùng tên `guides/` cho cả hướng dẫn sử dụng và vận hành v1; kh�
 |---|---|---|
 | `setup.md` | Cài môi trường locked, xác minh Python/package/CLI trên Windows; đối chiếu Linux CI | 00 |
 | `configuration.md` | Chuẩn bị config và env local, phân biệt research/provider/path settings, kiểm tra config hợp lệ | 00; bổ sung theo stage |
-| `running-pipeline.md` | Chạy pilot rồi các commands đã triển khai, chọn inputs/run_id, hiểu outputs và gate status | 01–06, cập nhật tăng dần |
 | `troubleshooting.md` | Chẩn đoán config lỗi, nguồn lỗi, gate thất bại, cache/identity/unit issues và replay mismatch | 00–07, chỉ ghi tình huống đã kiểm tra |
+| [running-pipeline.md](running-pipeline.md) | Chuẩn bị contact local, chạy pilot/replay, đọc artifacts và exit codes | 01 |
 | `reading-reports.md` | Đọc coverage, scores, targets/cash, performance và inference đúng phạm vi | 04–06 |
 | `quarterly-runbook.md` | Chạy signal → reconcile → outcome hàng quý, phân biệt targets với simulated holdings | 07 |
 | `backup-and-restore.md` | Backup artifacts/raw inputs, kiểm tra checksum, restore và replay một run | 07 |
