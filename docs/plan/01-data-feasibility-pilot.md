@@ -1,6 +1,17 @@
 # Stage 01 — Pilot khả thi dữ liệu
 
-Trạng thái: chưa bắt đầu. Phụ thuộc: [stage 00](00-technical-foundation.md). Nguồn quy tắc: [dữ liệu PIT](../idea/04-point-in-time-data.md), [dictionary](../idea/02-universe-factors-ranking.md), [cổng pilot](../idea/05-portfolio-roadmap.md).
+Trạng thái: đang triển khai; code và đường chạy offline có sẵn, cổng dữ liệu thật chưa đạt. Phụ thuộc: [stage 00](00-technical-foundation.md). Nguồn quy tắc: [dữ liệu PIT](../idea/04-point-in-time-data.md), [dictionary](../idea/02-universe-factors-ranking.md), [cổng pilot](../idea/05-portfolio-roadmap.md). Lần chạy local hiện tại bị chặn do chưa có `FRL_SEC_USER_AGENT`, roster chưa được xác minh lịch sử và chưa có đối chiếu độc lập.
+
+### Tiến độ implementation
+
+- [x] CLI `frl pilot` với đường ingestion và `--input-run` replay offline; mã thoát theo trạng thái cấu hình/chặn/lỗi.
+- [x] Config strict, quota roster 40 mã, cutoff XNYS 16:00 ET, raw store có checksum, lineage facts/ratios, Parquet schemas và manifest v2.
+- [x] Parser filing gốc, quy tắc availability PIT, quarterly/YTD/TTM và tám ratios; fixtures offline kiểm tra các trường hợp biên.
+- [x] Tạo run blocked 160 cells và replay offline có content hashes ổn định; xem [pilot findings](../research/pilot-findings.md).
+- [ ] Xác minh bằng nguồn lịch sử roster, ticker/share class, membership và các cờ loss/merger/delisting; hiện CSV chỉ là roster ứng viên.
+- [ ] Cấu hình contact trong `FRL_SEC_USER_AGENT`, chạy ingestion SEC và xác nhận provider/cache trên dữ liệu thật.
+- [ ] Đối chiếu độc lập ít nhất 10 doanh nghiệp/6 nhóm, cập nhật expected values, người/ngày kiểm tra và chờ người dùng review trên run được pin.
+- [ ] Chỉ đánh giá và duyệt group gates sau khi có snapshots thật; audit toàn universe vẫn là cổng Stage 02 riêng.
 
 ## Mục tiêu và đầu vào
 
@@ -25,14 +36,14 @@ Cache raw responses theo source/request/retrieved_at/hash; request thất bại 
 
 CLI dự kiến: `uv run frl pilot --config configs/pilot.toml`. Config pin roster, cutoffs, source settings và factor version; command hỗ trợ ingestion rồi transform, hoặc `--input-run` để chạy lại offline theo contract stage 00.
 
-Artifacts: roster và selection manifest, raw index, 160-cell coverage matrix, facts/ratios Parquet, reconciliation CSV, group gate JSON và feasibility report Markdown/HTML. Matrix phân biệt member/non-member, structural N/A, temporal missing, source absent, stale, unresolved và ratios/trục hợp lệ; luôn xuất mẫu số.
+Artifacts mỗi run: roster và selection manifest, raw index, 160-cell coverage matrix, facts/ratios Parquet, reconciliation CSV, group gate JSON và feasibility report Markdown/HTML. Matrix phân biệt membership, trạng thái nguồn/snapshot, hard filters, missing reasons và ratios/trục hợp lệ; luôn xuất mẫu số. Fixture/empty rows không phải bằng chứng membership, coverage hoặc kết quả thực.
 
 ## Kiểm tra nghiệm thu và điều kiện dừng
 
-- Fixtures kiểm tra filing sau cutoff, date-only, DST, amendment, YTD subtraction, nền growth âm, thiếu debt component và shares nhiều class. Không có fact sau cutoff được nhận.
+- Fixtures offline hiện kiểm tra filing sau cutoff, date-only, DST, amendment, YTD subtraction, nền growth âm, thiếu debt component, shares nhiều class, retry/cache và replay. Không có fact sau cutoff được nhận.
 - Mỗi nhóm có ≥ 3 doanh nghiệp có snapshot thực và ≥ 50% member snapshots đạt ≥ 3/4 trục; mọi mismatch trọng yếu và khác nghĩa ratio phải giải quyết. Đây là cổng feasibility, không chứng minh đại diện toàn ngành.
 - Dictionary đặc thù chưa đủ giữ unavailable; không phải lý do chặn primary lõi nếu lõi của nhóm đã qua cổng. Không fallback general cho Finan chưa đạt.
 - Bàn giao quyết định pass/block từng nhóm/nguồn, danh sách blockers và thay đổi idea cần thiết. Nhóm không đạt nằm ngoài scope đề xuất; nếu không nhóm nào đạt thì dừng tại feasibility report.
 - Không gọi pilot là chứng nhận survivor-free. Chỉ chuyển [stage 02](02-historical-data-universe.md) với nhóm/nguồn đạt cổng và các giới hạn được ghi lại.
 
-Nguồn chính thức: [SEC API](https://www.sec.gov/search-filings/edgar-application-programming-interfaces), [SEC developer resources](https://www.sec.gov/about/developer-resources), [yfinance source](https://github.com/ranaroussi/yfinance). Data budget vẫn 0 USD; chưa được tự mua dữ liệu.
+Nguồn chính thức: [SEC API](https://www.sec.gov/search-filings/edgar-application-programming-interfaces), [SEC developer resources](https://www.sec.gov/about/developer-resources), [yfinance source](https://github.com/ranaroussi/yfinance). Data budget vẫn 0 USD; chưa được tự mua dữ liệu. CLI thực tế và cách cấu hình contact nằm ở [running pipeline](../guides/running-pipeline.md).
