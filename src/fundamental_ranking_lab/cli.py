@@ -29,3 +29,28 @@ def doctor_command(
 @app.command("version", hidden=True)
 def version_command() -> None:
     """Keep the CLI as a command group so commands use explicit subcommands."""
+
+
+@app.command("pilot")
+def pilot_command(
+    config: Annotated[Path, typer.Option("--config", help="Validated pilot TOML configuration.")],
+    input_run: Annotated[
+        str | None, typer.Option("--input-run", help="Replay a pinned run offline.")
+    ] = None,
+) -> None:
+    """Collect the pilot or replay raw inputs; publish a feasibility report and gate status."""
+    from pydantic import ValidationError
+
+    from fundamental_ranking_lab.pilot import run_pilot
+
+    try:
+        code, destination = run_pilot(config, input_run)
+    except (ValidationError, ValueError, FileNotFoundError) as exc:
+        typer.echo(f"Invalid pilot configuration: {type(exc).__name__}", err=True)
+        raise typer.Exit(code=2) from None
+    except OSError as exc:
+        typer.echo(f"Pilot IO failure: {type(exc).__name__}", err=True)
+        raise typer.Exit(code=1) from None
+    typer.echo(f"Pilot run: {destination}")
+    typer.echo(f"Exit code: {code}; see manifest.json, feasibility.md and blockers_final.json.")
+    raise typer.Exit(code=code)
