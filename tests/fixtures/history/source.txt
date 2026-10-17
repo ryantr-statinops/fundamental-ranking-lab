@@ -1,0 +1,1 @@
+Synthetic historical evidence for offline tests only. No observed market data.

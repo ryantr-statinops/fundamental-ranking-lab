@@ -60,11 +60,19 @@ def resolve_universe(
         if len(ticker_rows) != 1:
             issues.append("ticker_missing_or_conflicting")
         membership = [r for r in rows if r.kind == "membership" and r.security_id == sid]
-        if len(membership) != 1 or membership[0].attributes.get("verified") != "true":
+        if (
+            len(membership) != 1
+            or membership[0].attributes.get("verified") != "true"
+            or membership[0].source in {"yfinance", "stooq"}
+        ):
             issues.append("listing_unverified")
         attrs = security.attributes
         status = "verified"
-        if attrs.get("country") != "US" or attrs.get("security_type") != "common":
+        if not all(
+            attrs.get(key) for key in ("country", "security_type", "exchange", "share_class")
+        ):
+            issues.append("security_classification_unresolved")
+        elif attrs.get("country") != "US" or attrs.get("security_type") != "common":
             status = "excluded"
             issues.append("country_or_security_type_excluded")
         elif attrs.get("exchange") not in {"NYSE", "NASDAQ", "AMEX"}:

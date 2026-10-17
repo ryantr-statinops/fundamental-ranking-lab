@@ -90,3 +90,32 @@ def test_ticker_reuse_is_allowed_only_in_nonoverlapping_intervals() -> None:
     )
     assert len(asof((first, second), datetime(2010, 1, 1, tzinfo=UTC))) == 1
     assert asof((first, second), datetime(2012, 1, 1, tzinfo=UTC))[0].security_id == "s2"
+
+
+def test_duplicate_entity_class_and_overlapping_ticker_are_quarantined() -> None:
+    rows = []
+    for sid in ("s", "s2"):
+        rows.extend(
+            [
+                evidence(
+                    "security",
+                    f"security-{sid}",
+                    security_id=sid,
+                    attributes={
+                        "country": "US",
+                        "security_type": "common",
+                        "exchange": "NYSE",
+                        "share_class": "A",
+                    },
+                ),
+                evidence(
+                    "identifier",
+                    f"ticker-{sid}",
+                    security_id=sid,
+                    attributes={"type": "ticker", "value": "SAME"},
+                ),
+            ]
+        )
+    output, quarantine = resolve_universe(bundle(rows), datetime(2010, 1, 1, tzinfo=UTC))
+    assert len(quarantine) == 2
+    assert all(r["membership"] == "unresolved" for r in output)

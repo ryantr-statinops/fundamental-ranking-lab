@@ -1,5 +1,6 @@
 from datetime import UTC, date, datetime
 
+import exchange_calendars as xcals
 from tests.test_universe import bundle, evidence
 
 from fundamental_ranking_lab.history_contracts import Price
@@ -43,3 +44,47 @@ def test_raw_and_adjusted_prices_are_distinct() -> None:
         raw_sha256="0" * 64,
     )
     assert row.close != row.adjusted_close
+
+
+def test_adv_tie_break_missing_session_and_currency() -> None:
+    cutoff = datetime(2010, 3, 31, 20, tzinfo=UTC)
+    calendar = xcals.get_calendar("XNYS", start="2010-01-01", end="2010-12-31")
+    sessions = calendar.sessions_in_range("2010-03-01", "2010-03-31")[-20:]
+    rows = [
+        evidence(
+            "filing",
+            f"q-{year}-{month}",
+            attributes={"form": "10-Q", "period_end": f"{year}-{month:02d}-01"},
+        )
+        for year in (2007, 2008)
+        for month in (3, 6, 9, 12)
+    ]
+    rows.extend(
+        evidence("share", f"shares-{sid}", security_id=sid, attributes={"shares": "1000"})
+        for sid in ("a", "b")
+    )
+    prices = [
+        Price(
+            security_id=sid,
+            session=s.date(),
+            known_at=s.to_pydatetime().replace(tzinfo=UTC),
+            close="10",
+            volume="100000",
+            currency="USD",
+            convention="verified_raw",
+            raw_sha256="0" * 64,
+        )
+        for sid in ("a", "b")
+        for s in sessions
+    ]
+    sample = bundle(rows).model_copy(update={"prices": tuple(prices)})
+    universe = [{"security_id": sid, "entity_id": "e", "issues": []} for sid in ("a", "b")]
+    result = market_filters(sample, cutoff, universe)
+    assert all(r["hard_filters_pass"] for r in result)
+    assert [r["security_id"] for r in result if r["selected_class"]] == ["a"]
+    sample = sample.model_copy(update={"prices": tuple(prices[1:])})
+    result = market_filters(sample, cutoff, universe)
+    assert not any(r["selected_class"] for r in result)
+    prices[0] = prices[0].model_copy(update={"currency": "EUR"})
+    sample = sample.model_copy(update={"prices": tuple(prices)})
+    assert "currency_unverified" in market_filters(sample, cutoff, universe)[0]["issues"]

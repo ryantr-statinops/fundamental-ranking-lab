@@ -40,6 +40,17 @@ def _history_command(action: Callable[[], tuple[int, Path]]) -> None:
     raise typer.Exit(code=code)
 
 
+@app.command("audit-universe")
+def audit_universe_command(
+    config: Annotated[Path, typer.Option("--config")],
+    input_run: Annotated[str, typer.Option("--input-run")],
+) -> None:
+    """Audit pinned historical inputs offline."""
+    from fundamental_ranking_lab.history_audit import audit
+
+    _history_command(lambda: audit(config, input_run))
+
+
 @app.command("doctor")
 def doctor_command(
     config: Annotated[

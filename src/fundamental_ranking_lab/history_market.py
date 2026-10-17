@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
@@ -55,14 +55,19 @@ def market_filters(
             if max(prices, key=lambda p: p.session).close < 1:
                 issues.append("raw_close_below_threshold")
         filings = {
-            r.attributes.get("period_end")
+            r.attributes["period_end"]
             for r in evidence
             if r.entity_id == entity
             and r.kind == "filing"
             and r.attributes.get("form") in {"10-K", "10-Q", "10-K/A", "10-Q/A"}
             and r.attributes.get("period_end")
         }
-        if len(filings) < 8:
+        filings = {period for period in filings if date.fromisoformat(period) <= cutoff.date()}
+        quarters = {
+            (date.fromisoformat(period).year, (date.fromisoformat(period).month - 1) // 3)
+            for period in filings
+        }
+        if len(quarters) < 8:
             issues.append("fewer_than_eight_reported_quarters")
         shares = [r for r in evidence if r.security_id == sid and r.kind == "share"]
         try:
@@ -77,7 +82,7 @@ def market_filters(
                 **security,
                 "issues": sorted(set(issues)),
                 "adv20_usd": str(adv) if adv is not None else None,
-                "reported_quarters": len(filings),
+                "reported_quarters": len(quarters),
                 "selected_class": False,
                 "hard_filters_pass": not issues,
             }

@@ -6,12 +6,13 @@ import json
 import os
 import platform
 import tempfile
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
 from fundamental_ranking_lab.history_config import HistoryConfig, load_history_config
 from fundamental_ranking_lab.history_contracts import HistoryBundle
+from fundamental_ranking_lab.history_sources import discover
 from fundamental_ranking_lab.manifest import (
     RunManifest,
     canonical_sha256,
@@ -19,7 +20,39 @@ from fundamental_ranking_lab.manifest import (
     sha256_file,
     write_manifest,
 )
+from fundamental_ranking_lab.providers import YFinanceProvider
 from fundamental_ranking_lab.raw import RawRecord, RawStore, SecHTTP, SourceError, encode_json
+
+
+def collect_request(
+    request: dict[str, str], http: SecHTTP, store: RawStore, prices: YFinanceProvider
+) -> RawRecord:
+    if request["kind"] == "prices":
+        from fundamental_ranking_lab.pilot_config import RosterEntry
+
+        if not request["url"].startswith("yfinance:"):
+            raise ValueError("prices request requires yfinance:symbol")
+        symbol = request["url"].split(":", 1)[1]
+        entry = RosterEntry(
+            entity_id=request["entity_id"],
+            cik="0000000000",
+            symbol=symbol,
+            group="General",
+            selection_reason="historical request target only",
+            source_url="https://www.sec.gov/",
+        )
+        return prices.collect(entry, symbol, date.fromisoformat(request["end"]))
+    response = http.get(request["url"])
+    if request["kind"] in {"submissions", "submissions_history", "filing_index", "companyfacts"}:
+        json.loads(response.content)
+    return store.put(
+        response.content,
+        source="sec",
+        url=request["url"],
+        kind=request["kind"],
+        entity_id=request["entity_id"],
+        headers=dict(response.headers),
+    )
 
 
 def dump(path: Path, value: object) -> None:
@@ -176,23 +209,14 @@ def ingest(
                     blockers.append("prototype_only")
                 if not blockers:
                     http = SecHTTP(contact, config.collection)
+                    prices = YFinanceProvider(store, config.collection.requests_per_second)
                     try:
                         for request in bundle.requests:
                             key = canonical_sha256(request)
                             if key in checkpoints:
                                 store.read(RawRecord.model_validate(checkpoints[key]))
                                 continue
-                            response = http.get(request["url"])
-                            if request["kind"] in {"submissions", "filing_index", "companyfacts"}:
-                                json.loads(response.content)
-                            record = store.put(
-                                response.content,
-                                source="sec",
-                                url=request["url"],
-                                kind=request["kind"],
-                                entity_id=request["entity_id"],
-                                headers=dict(response.headers),
-                            )
+                            record = collect_request(request, http, store, prices)
                             records.append(record)
                             checkpoints[key] = record.model_dump(mode="json")
                             dump(temporary / "checkpoints.json", checkpoints)
@@ -205,6 +229,12 @@ def ingest(
         blockers.append("collection_failed")
         code = 1
     dump(temporary / "bundle.json", bundle.model_dump(mode="json"))
+    try:
+        dump(temporary / "discovery.json", discover(records, store))
+    except (ValueError, SourceError):
+        blockers.append("historical_discovery_invalid")
+        code = 1
+        dump(temporary / "discovery.json", [])
     dump(temporary / "raw_index.json", [r.model_dump(mode="json") for r in records])
     dump(temporary / "checkpoints.json", checkpoints)
     dump(temporary / "blockers.json", sorted(set(blockers)))

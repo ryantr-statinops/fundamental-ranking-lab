@@ -1,0 +1,305 @@
+{
+  "prototype": true,
+  "mapping_version": "synthetic-ff17-v1",
+  "mapping": [
+    {
+      "low": 3500,
+      "high": 3599,
+      "industry": "Machn",
+      "group": "General"
+    }
+  ],
+  "mapping_sha256": "5c5e616c3689e86c7859d7ae6d013b54728f3e366419aa55839601465526b579",
+  "evidence": [
+    {
+      "evidence_id": "fixture-a",
+      "revision_id": "1",
+      "kind": "security",
+      "entity_id": "fixture-entity",
+      "security_id": "fixture-a",
+      "source": "fixture",
+      "source_record_id": "fixture-a",
+      "raw_sha256": "028963b0da507178cbd6d5e3d3f71e741480ff18f093741485a32db004c9a20d",
+      "known_at": "2009-01-01T00:00:00Z",
+      "valid_from": "2007-01-01",
+      "attributes": {
+        "country": "US",
+        "security_type": "common",
+        "exchange": "NYSE",
+        "share_class": "A"
+      }
+    },
+    {
+      "evidence_id": "fixture-a-ticker",
+      "revision_id": "1",
+      "kind": "identifier",
+      "entity_id": "fixture-entity",
+      "security_id": "fixture-a",
+      "source": "fixture",
+      "source_record_id": "fixture-a-ticker",
+      "raw_sha256": "028963b0da507178cbd6d5e3d3f71e741480ff18f093741485a32db004c9a20d",
+      "known_at": "2009-01-01T00:00:00Z",
+      "valid_from": "2007-01-01",
+      "attributes": {
+        "type": "ticker",
+        "value": "FIXTURE-A"
+      }
+    },
+    {
+      "evidence_id": "fixture-a-listing",
+      "revision_id": "1",
+      "kind": "membership",
+      "entity_id": "fixture-entity",
+      "security_id": "fixture-a",
+      "source": "fixture",
+      "source_record_id": "fixture-a-listing",
+      "raw_sha256": "028963b0da507178cbd6d5e3d3f71e741480ff18f093741485a32db004c9a20d",
+      "known_at": "2009-01-01T00:00:00Z",
+      "valid_from": "2007-01-01",
+      "attributes": {
+        "verified": "true"
+      }
+    },
+    {
+      "evidence_id": "fixture-a-shares",
+      "revision_id": "1",
+      "kind": "share",
+      "entity_id": "fixture-entity",
+      "security_id": "fixture-a",
+      "source": "fixture",
+      "source_record_id": "fixture-a-shares",
+      "raw_sha256": "028963b0da507178cbd6d5e3d3f71e741480ff18f093741485a32db004c9a20d",
+      "known_at": "2009-01-01T00:00:00Z",
+      "valid_from": "2007-01-01",
+      "attributes": {
+        "shares": "1000000"
+      }
+    },
+    {
+      "evidence_id": "fixture-b",
+      "revision_id": "1",
+      "kind": "security",
+      "entity_id": "fixture-entity",
+      "security_id": "fixture-b",
+      "source": "fixture",
+      "source_record_id": "fixture-b",
+      "raw_sha256": "028963b0da507178cbd6d5e3d3f71e741480ff18f093741485a32db004c9a20d",
+      "known_at": "2009-01-01T00:00:00Z",
+      "valid_from": "2007-01-01",
+      "attributes": {
+        "country": "US",
+        "security_type": "common",
+        "exchange": "NYSE",
+        "share_class": "B"
+      }
+    },
+    {
+      "evidence_id": "fixture-b-ticker",
+      "revision_id": "1",
+      "kind": "identifier",
+      "entity_id": "fixture-entity",
+      "security_id": "fixture-b",
+      "source": "fixture",
+      "source_record_id": "fixture-b-ticker",
+      "raw_sha256": "028963b0da507178cbd6d5e3d3f71e741480ff18f093741485a32db004c9a20d",
+      "known_at": "2009-01-01T00:00:00Z",
+      "valid_from": "2007-01-01",
+      "attributes": {
+        "type": "ticker",
+        "value": "FIXTURE-B"
+      }
+    },
+    {
+      "evidence_id": "fixture-b-listing",
+      "revision_id": "1",
+      "kind": "membership",
+      "entity_id": "fixture-entity",
+      "security_id": "fixture-b",
+      "source": "fixture",
+      "source_record_id": "fixture-b-listing",
+      "raw_sha256": "028963b0da507178cbd6d5e3d3f71e741480ff18f093741485a32db004c9a20d",
+      "known_at": "2009-01-01T00:00:00Z",
+      "valid_from": "2007-01-01",
+      "attributes": {
+        "verified": "true"
+      }
+    },
+    {
+      "evidence_id": "fixture-b-shares",
+      "revision_id": "1",
+      "kind": "share",
+      "entity_id": "fixture-entity",
+      "security_id": "fixture-b",
+      "source": "fixture",
+      "source_record_id": "fixture-b-shares",
+      "raw_sha256": "028963b0da507178cbd6d5e3d3f71e741480ff18f093741485a32db004c9a20d",
+      "known_at": "2009-01-01T00:00:00Z",
+      "valid_from": "2007-01-01",
+      "attributes": {
+        "shares": "1000000"
+      }
+    },
+    {
+      "evidence_id": "sic",
+      "revision_id": "1",
+      "kind": "industry",
+      "entity_id": "fixture-entity",
+      "security_id": "fixture-a",
+      "source": "fixture",
+      "source_record_id": "sic",
+      "raw_sha256": "028963b0da507178cbd6d5e3d3f71e741480ff18f093741485a32db004c9a20d",
+      "known_at": "2009-01-01T00:00:00Z",
+      "valid_from": "2007-01-01",
+      "attributes": {
+        "sic": "3571"
+      }
+    },
+    {
+      "evidence_id": "q-2007-3",
+      "revision_id": "1",
+      "kind": "filing",
+      "entity_id": "fixture-entity",
+      "security_id": "fixture-a",
+      "source": "fixture",
+      "source_record_id": "q-2007-3",
+      "raw_sha256": "028963b0da507178cbd6d5e3d3f71e741480ff18f093741485a32db004c9a20d",
+      "known_at": "2009-01-01T00:00:00Z",
+      "valid_from": "2007-01-01",
+      "attributes": {
+        "form": "10-Q",
+        "period_end": "2007-03-31"
+      }
+    },
+    {
+      "evidence_id": "q-2007-6",
+      "revision_id": "1",
+      "kind": "filing",
+      "entity_id": "fixture-entity",
+      "security_id": "fixture-a",
+      "source": "fixture",
+      "source_record_id": "q-2007-6",
+      "raw_sha256": "028963b0da507178cbd6d5e3d3f71e741480ff18f093741485a32db004c9a20d",
+      "known_at": "2009-01-01T00:00:00Z",
+      "valid_from": "2007-01-01",
+      "attributes": {
+        "form": "10-Q",
+        "period_end": "2007-06-30"
+      }
+    },
+    {
+      "evidence_id": "q-2007-9",
+      "revision_id": "1",
+      "kind": "filing",
+      "entity_id": "fixture-entity",
+      "security_id": "fixture-a",
+      "source": "fixture",
+      "source_record_id": "q-2007-9",
+      "raw_sha256": "028963b0da507178cbd6d5e3d3f71e741480ff18f093741485a32db004c9a20d",
+      "known_at": "2009-01-01T00:00:00Z",
+      "valid_from": "2007-01-01",
+      "attributes": {
+        "form": "10-Q",
+        "period_end": "2007-09-30"
+      }
+    },
+    {
+      "evidence_id": "q-2007-12",
+      "revision_id": "1",
+      "kind": "filing",
+      "entity_id": "fixture-entity",
+      "security_id": "fixture-a",
+      "source": "fixture",
+      "source_record_id": "q-2007-12",
+      "raw_sha256": "028963b0da507178cbd6d5e3d3f71e741480ff18f093741485a32db004c9a20d",
+      "known_at": "2009-01-01T00:00:00Z",
+      "valid_from": "2007-01-01",
+      "attributes": {
+        "form": "10-K",
+        "period_end": "2007-12-31"
+      }
+    },
+    {
+      "evidence_id": "q-2008-3",
+      "revision_id": "1",
+      "kind": "filing",
+      "entity_id": "fixture-entity",
+      "security_id": "fixture-a",
+      "source": "fixture",
+      "source_record_id": "q-2008-3",
+      "raw_sha256": "028963b0da507178cbd6d5e3d3f71e741480ff18f093741485a32db004c9a20d",
+      "known_at": "2009-01-01T00:00:00Z",
+      "valid_from": "2007-01-01",
+      "attributes": {
+        "form": "10-Q",
+        "period_end": "2008-03-31"
+      }
+    },
+    {
+      "evidence_id": "q-2008-6",
+      "revision_id": "1",
+      "kind": "filing",
+      "entity_id": "fixture-entity",
+      "security_id": "fixture-a",
+      "source": "fixture",
+      "source_record_id": "q-2008-6",
+      "raw_sha256": "028963b0da507178cbd6d5e3d3f71e741480ff18f093741485a32db004c9a20d",
+      "known_at": "2009-01-01T00:00:00Z",
+      "valid_from": "2007-01-01",
+      "attributes": {
+        "form": "10-Q",
+        "period_end": "2008-06-30"
+      }
+    },
+    {
+      "evidence_id": "q-2008-9",
+      "revision_id": "1",
+      "kind": "filing",
+      "entity_id": "fixture-entity",
+      "security_id": "fixture-a",
+      "source": "fixture",
+      "source_record_id": "q-2008-9",
+      "raw_sha256": "028963b0da507178cbd6d5e3d3f71e741480ff18f093741485a32db004c9a20d",
+      "known_at": "2009-01-01T00:00:00Z",
+      "valid_from": "2007-01-01",
+      "attributes": {
+        "form": "10-Q",
+        "period_end": "2008-09-30"
+      }
+    },
+    {
+      "evidence_id": "q-2008-12",
+      "revision_id": "1",
+      "kind": "filing",
+      "entity_id": "fixture-entity",
+      "security_id": "fixture-a",
+      "source": "fixture",
+      "source_record_id": "q-2008-12",
+      "raw_sha256": "028963b0da507178cbd6d5e3d3f71e741480ff18f093741485a32db004c9a20d",
+      "known_at": "2009-01-01T00:00:00Z",
+      "valid_from": "2007-01-01",
+      "attributes": {
+        "form": "10-K",
+        "period_end": "2008-12-31"
+      }
+    },
+    {
+      "evidence_id": "unresolved-delisting",
+      "revision_id": "1",
+      "kind": "event",
+      "entity_id": "fixture-entity",
+      "security_id": "fixture-a",
+      "source": "fixture",
+      "source_record_id": "unresolved-delisting",
+      "raw_sha256": "028963b0da507178cbd6d5e3d3f71e741480ff18f093741485a32db004c9a20d",
+      "known_at": "2009-01-01T00:00:00Z",
+      "valid_from": "2007-01-01",
+      "attributes": {
+        "action_type": "delisting"
+      }
+    }
+  ],
+  "prices": [],
+  "raw_files": {
+    "source.txt": "028963b0da507178cbd6d5e3d3f71e741480ff18f093741485a32db004c9a20d"
+  }
+}

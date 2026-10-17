@@ -37,7 +37,12 @@ class HistoryConfig(AppConfig):
 
     def research_fingerprint(self) -> str:
         return canonical_sha256(
-            self.history.model_dump(mode="json", exclude={"bundle_path", "pilot_run"})
+            {
+                "history": self.history.model_dump(
+                    mode="json", exclude={"bundle_path", "pilot_run"}
+                ),
+                "research": self.research.model_dump(mode="json"),
+            }
         )
 
 

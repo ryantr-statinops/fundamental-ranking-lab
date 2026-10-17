@@ -43,3 +43,23 @@ def test_ingest_replay_and_resume_are_immutable(
 def test_mutually_exclusive_replay_resume(tmp_path: Path) -> None:
     with pytest.raises(ValueError):
         ingest(make_config(tmp_path), "one", "two")
+
+
+def test_pinned_raw_corruption_never_falls_back_to_network(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = make_config(tmp_path)
+    fixture = Path("tests/fixtures/history")
+    for name in ("bundle.json", "source.txt"):
+        (tmp_path / name).write_bytes((fixture / name).read_bytes())
+    _, run = ingest(config)
+    record = json.loads((run / "raw_index.json").read_bytes())[0]
+    raw = tmp_path / "data" / "raw" / record["relative_path"]
+    monkeypatch.setattr("httpx.Client.get", lambda *a, **k: pytest.fail("offline network"))
+    raw.write_bytes(b"corrupt")
+    with pytest.raises(SourceError):
+        ingest(config, input_run=run.name)
+    raw.unlink()
+    with pytest.raises(SourceError):
+        ingest(config, input_run=run.name)
