@@ -12,6 +12,7 @@ Dùng tên `guides/` cho cả hướng dẫn sử dụng và vận hành v1; kh�
 | `configuration.md` | Chuẩn bị config và env local, phân biệt research/provider/path settings, kiểm tra config hợp lệ | 00; bổ sung theo stage |
 | `troubleshooting.md` | Chẩn đoán config lỗi, nguồn lỗi, gate thất bại, cache/identity/unit issues và replay mismatch | 00–07, chỉ ghi tình huống đã kiểm tra |
 | [running-pipeline.md](running-pipeline.md) | Chuẩn bị contact local, chạy pilot/replay, đọc artifacts và exit codes | 01 |
+| [historical-universe.md](historical-universe.md) | Ingest/replay/resume và audit universe bằng fixtures; dữ liệu thật vẫn chờ pilot | 02 offline |
 | `reading-reports.md` | Đọc coverage, scores, targets/cash, performance và inference đúng phạm vi | 04–06 |
 | `quarterly-runbook.md` | Chạy signal → reconcile → outcome hàng quý, phân biệt targets với simulated holdings | 07 |
 | `backup-and-restore.md` | Backup artifacts/raw inputs, kiểm tra checksum, restore và replay một run | 07 |
