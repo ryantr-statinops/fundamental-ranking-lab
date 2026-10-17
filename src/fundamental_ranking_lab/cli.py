@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 from typing import Annotated
 
@@ -10,6 +11,33 @@ import typer
 from fundamental_ranking_lab.doctor import diagnostics
 
 app = typer.Typer(no_args_is_help=True, help="Tools for reproducible ranking research.")
+
+
+@app.command("ingest")
+def ingest_command(
+    config: Annotated[Path, typer.Option("--config")],
+    input_run: Annotated[str | None, typer.Option("--input-run")] = None,
+    resume_run: Annotated[str | None, typer.Option("--resume-run")] = None,
+) -> None:
+    """Collect historical evidence or replay pinned inputs offline."""
+    from fundamental_ranking_lab.history import ingest
+
+    _history_command(lambda: ingest(config, input_run, resume_run))
+
+
+def _history_command(action: Callable[[], tuple[int, Path]]) -> None:
+    from fundamental_ranking_lab.raw import SourceError
+
+    try:
+        code, destination = action()
+    except (ValueError, FileNotFoundError):
+        typer.echo("Invalid history configuration or missing input.", err=True)
+        raise typer.Exit(code=2) from None
+    except (OSError, SourceError):
+        typer.echo("History IO or pinned source failure.", err=True)
+        raise typer.Exit(code=1) from None
+    typer.echo(f"History run: {destination}; exit code: {code}")
+    raise typer.Exit(code=code)
 
 
 @app.command("doctor")
