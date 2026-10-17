@@ -1,6 +1,18 @@
 # Stage 02 — Dữ liệu lịch sử và universe
 
-Trạng thái: chưa bắt đầu. Phụ thuộc: [pilot](01-data-feasibility-pilot.md) đạt cổng cho từng nhóm/nguồn. Nguồn quy tắc: [universe](../idea/02-universe-factors-ranking.md), [identity/PIT](../idea/04-point-in-time-data.md).
+Trạng thái: đã triển khai phần offline bằng fixtures; chưa đạt cổng dữ liệu thật. Phụ thuộc dữ liệu vẫn là [pilot](01-data-feasibility-pilot.md) đạt cổng cho từng nhóm/nguồn. Nguồn quy tắc: [universe](../idea/02-universe-factors-ranking.md), [identity/PIT](../idea/04-point-in-time-data.md).
+
+## Bàn giao implementation offline — 2026-10-17
+
+- Có strict history config, contracts riêng, evidence revisions và raw/mapping checksums.
+- Có CLI ingest/replay/resume, checkpoints, SEC discovery parsers và request adapter dùng lại SEC/yfinance.
+- Có universe as-of, conflicts/quarantine, historical SIC mapping, class selection và market/event checks.
+- Có audit offline, Parquet, coverage/discrepancies/event registry và scope gates; fixtures luôn prototype.
+- Chưa ingestion hoặc đối chiếu dữ liệu thật; không tuyên bố universe đầy đủ hay survivor-free. Normalized evidence và price convention cần review/import thủ công, chưa có universal source mapper.
+
+Hướng dẫn thực tế: [historical universe](../guides/historical-universe.md); hợp đồng và giới hạn: [technical reference](../technical/historical-universe.md). Chỉ tiếp tục Stage 03 trên scope dữ liệu được audit; fixtures không mở cổng performance.
+
+Kiểm chứng local Windows: 63 tests pass, Ruff lint/format và mypy pass. Smoke fixtures chạy 64 cutoffs, xuất 12 Parquet tables; ingest/replay/audit đều exit 3 như mong đợi và audit content hashes khớp. Ingest run `20261017T042557.807680Z-f36386c7-7e0d-4cbf-826d-589a7dc55809`; audit run `20261017T042601.815195Z-8a26101e-58e2-487c-9e02-ee35eb88eec1`. Payload local không commit; CI của branch chưa được quan sát vì chưa push.
 
 ## Mục tiêu và đầu vào
 
