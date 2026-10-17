@@ -111,4 +111,19 @@ def resolve_universe(
                 ],
             }
         )
+    # Preserve candidates whose identifiers/listing evidence exist without a security definition.
+    for sid in sorted({r.security_id for r in rows if r.security_id} - set(grouped)):
+        related = [r for r in rows if r.security_id == sid]
+        output.append(
+            {
+                "security_id": sid,
+                "entity_id": related[0].entity_id,
+                "ticker": None,
+                "group": None,
+                "industry": None,
+                "membership": "unresolved",
+                "issues": ["security_definition_missing"],
+                "evidence_ids": [r.evidence_id for r in related],
+            }
+        )
     return output, quarantine

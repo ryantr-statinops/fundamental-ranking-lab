@@ -119,3 +119,12 @@ def test_duplicate_entity_class_and_overlapping_ticker_are_quarantined() -> None
     output, quarantine = resolve_universe(bundle(rows), datetime(2010, 1, 1, tzinfo=UTC))
     assert len(quarantine) == 2
     assert all(r["membership"] == "unresolved" for r in output)
+
+
+def test_orphan_listing_is_preserved_as_unresolved_candidate() -> None:
+    output, _ = resolve_universe(
+        bundle([evidence("membership", "listing", attributes={"verified": "true"})]),
+        datetime(2010, 1, 1, tzinfo=UTC),
+    )
+    assert output[0]["membership"] == "unresolved"
+    assert output[0]["issues"] == ["security_definition_missing"]

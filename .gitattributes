@@ -1,0 +1,2 @@
+# Raw fixture checksums must survive Windows/Linux checkouts byte for byte.
+tests/fixtures/history/source.txt -text
