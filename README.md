@@ -75,7 +75,7 @@ Trần 20%/5% và các tham số khác là mặc định nghiên cứu, chưa đ
 |---|---|---|
 | Thiết kế nghiên cứu | Câu hỏi, quy tắc, tham số và tiêu chí kiểm chứng được ghi rõ | Đã ghi nhận; một số giả định chờ kiểm chứng |
 | Pilot dữ liệu | 40 doanh nghiệp × 4 cutoff cuối năm 2012/2018/2022/2025; đối chiếu filing gốc ít nhất 10 doanh nghiệp | Code/replay offline có; ingestion và cổng dữ liệu bị chặn |
-| Audit universe | Xác minh membership, identity, ngành, giá và corporate actions trên sample | Chưa thực hiện |
+| Audit universe | Xác minh membership, identity, ngành, giá và corporate actions trên sample | Implementation offline có; audit dữ liệu thật chưa thực hiện |
 | Pipeline và baseline | Tái lập snapshots, scores, ranking và danh mục | Chưa triển khai |
 | Validation và final test | Báo cáo ngoài mẫu, độ bất định và kết luận Q1–Q3 | Chưa thực hiện |
 | Mở rộng ML | Đánh giá giá trị tăng thêm so với factor baseline | Hoãn |
@@ -117,3 +117,5 @@ uv run mypy src
 `frl doctor` chỉ đọc runtime và config. Lệnh pilot đã có nhưng lần chạy live hiện chưa thể gọi SEC cho tới khi bạn thiết lập contact local; cách làm và replay ghi ở [hướng dẫn chạy pipeline](docs/guides/running-pipeline.md). Ranking, portfolio và backtest chưa khả dụng. Xem thêm [hướng dẫn setup](docs/guides/setup.md), [configuration](docs/guides/configuration.md), [technical architecture](docs/technical/architecture.md) và [pilot findings](docs/research/pilot-findings.md).
 
 Khi thay đổi thiết kế, cập nhật tài liệu nguồn trong `docs/idea`, sổ quyết định và bảng tham số; README này giữ vai trò tổng quan.
+
+Stage 02 có `frl ingest` và `frl audit-universe` cho fixtures/replay, chưa đạt cổng dữ liệu thật. Xem [hướng dẫn historical universe](docs/guides/historical-universe.md) để chạy mà không cần SEC contact; fixtures không mở quyền kết luận performance.
