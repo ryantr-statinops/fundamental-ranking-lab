@@ -4,6 +4,8 @@ Mục này mô tả thiết kế và hành vi đã triển khai theo stage. Stag
 
 ## Kế hoạch nội dung
 
+Stage 02 offline: [historical universe](historical-universe.md) mô tả evidence revisions, contracts riêng, checkpoints và scope gates. Chưa xác minh dữ liệu lịch sử thật.
+
 Các file dưới đây là technical references hiện có; mỗi file phân biệt code chạy được với data gate chưa đạt. Tiêu chí chi tiết nằm trong [kế hoạch bàn giao](../plan/documentation-delivery.md).
 
 | File dự kiến | Nội dung | Bắt đầu / hoàn thiện |
