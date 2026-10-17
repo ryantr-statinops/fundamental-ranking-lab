@@ -8,7 +8,7 @@ Ngày lập: 2026-10-15; cập nhật: 2026-10-16. Bộ tài liệu này chuyể
 |---|---|---|---|
 | 00 | [Nền tảng kỹ thuật](00-technical-foundation.md) | Bộ idea hiện tại | Đạt cổng nền tảng |
 | 01 | [Pilot khả thi dữ liệu](01-data-feasibility-pilot.md) | 00 | Đang triển khai; pilot thật bị chặn |
-| 02 | [Dữ liệu lịch sử và universe](02-historical-data-universe.md) | 01: nhóm/nguồn đạt cổng | Chưa bắt đầu |
+| 02 | [Dữ liệu lịch sử và universe](02-historical-data-universe.md) | 01: nhóm/nguồn đạt cổng | Có implementation offline; dữ liệu thật chưa đạt cổng |
 | 03 | [Point-in-time và features](03-point-in-time-features.md) | 02: manifest phạm vi đã khóa | Chưa bắt đầu |
 | 04 | [Ranking baseline](04-ranking-baseline.md) | 03 | Chưa bắt đầu |
 | 05 | [Portfolio và backtest](05-portfolio-backtest.md) | 02–04: dữ liệu đạt cổng | Chưa bắt đầu |
