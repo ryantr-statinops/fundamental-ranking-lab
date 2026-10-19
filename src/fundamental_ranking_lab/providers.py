@@ -27,6 +27,17 @@ class SECProvider:
         *,
         expect_json: bool = True,
     ) -> bytes:
+        cached = self.store.get_cached(url)
+        if cached is not None:
+            record, content = cached
+            if expect_json:
+                try:
+                    json.loads(content)
+                except (ValueError, UnicodeDecodeError):
+                    cached = None
+            if cached is not None:
+                self.records.append(record)
+                return content
         response = self.http.get(url)
         if expect_json:
             try:
@@ -135,6 +146,10 @@ class YFinanceProvider:
         self.last_request: float | None = None
 
     def collect(self, entry: RosterEntry, symbol: str, cutoff: date) -> RawRecord:
+        url = f"yfinance:{symbol}:{cutoff}"
+        cached = self.store.get_cached(url)
+        if cached is not None:
+            return cached[0]
         import yfinance as yf  # type: ignore[import-untyped]
 
         if self.last_request is not None:
@@ -179,7 +194,7 @@ class YFinanceProvider:
         return self.store.put(
             encode_json(payload),
             source="yfinance",
-            url=f"yfinance:{symbol}:{cutoff}",
+            url=url,
             kind="prices",
             entity_id=entry.entity_id,
         )

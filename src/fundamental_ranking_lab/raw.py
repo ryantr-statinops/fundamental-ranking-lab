@@ -41,6 +41,32 @@ class SourceError(RuntimeError):
 class RawStore:
     def __init__(self, root: Path) -> None:
         self.root = root.resolve()
+        self._index_file = self.root / ".records_cache.json"
+        self._cache: dict[str, dict[str, Any]] = {}
+        if self._index_file.exists():
+            try:
+                self._cache = json.loads(self._index_file.read_text(encoding="utf-8"))
+            except Exception:
+                self._cache = {}
+
+    def get_cached(self, url: str) -> tuple[RawRecord, bytes] | None:
+        entry = self._cache.get(url)
+        if not entry:
+            return None
+        try:
+            record = RawRecord.model_validate(entry)
+            content = self.read(record)
+            return record, content
+        except Exception:
+            self._cache.pop(url, None)
+            return None
+
+    def _save_cache(self) -> None:
+        try:
+            self.root.mkdir(parents=True, exist_ok=True)
+            self._index_file.write_text(json.dumps(self._cache), encoding="utf-8")
+        except Exception:
+            pass
 
     def put(
         self,
@@ -79,7 +105,7 @@ class RawStore:
         finally:
             temporary.unlink(missing_ok=True)
         permitted = {"content-type", "etag", "last-modified"}
-        return RawRecord(
+        record = RawRecord(
             source=source,
             url=url,
             relative_path=relative,
@@ -90,7 +116,9 @@ class RawStore:
             accession=accession,
             headers={k.lower(): v for k, v in (headers or {}).items() if k.lower() in permitted},
         )
-
+        self._cache[url] = record.model_dump(mode="json")
+        self._save_cache()
+        return record
     def read(self, record: RawRecord) -> bytes:
         target = (self.root / record.relative_path).resolve()
         if not target.is_relative_to(self.root):
