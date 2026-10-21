@@ -27,11 +27,11 @@ Giá trị chỉ nằm trong môi trường local, không đưa vào TOML, Git, 
 uv run frl pilot --config configs/pilot.toml
 uv run frl pilot --config configs/pilot.toml --input-run <run_id>
 ```
+Lệnh đầu tạo run mới dưới `artifacts/<run_id>` và raw payload dưới `data/raw`. Hệ thống tự động ghi nhận và cập nhật persistent cache index tại `data/raw/.records_cache.json`. Nếu tiến trình bị dừng hoặc gián đoạn giữa chừng, lệnh kế tiếp sẽ tự động nạp từ cache và tiếp tục mà không tải lại dữ liệu đã có. Lệnh thứ hai đọc cache và manifest của run chỉ định; thiếu raw hoặc checksum sai thì thất bại, không tự tải lại.
 
-Lệnh đầu tạo run mới dưới `artifacts/<run_id>` và raw payload dưới `data/raw`. Run output gồm manifest, selection, raw index, coverage 160 cells, facts/ratios Parquet, reconciliation CSV, group gates, blockers và feasibility report Markdown/HTML. Lệnh thứ hai đọc cache và manifest của run chỉ định; thiếu raw hoặc checksum sai thì thất bại, không tự tải lại. Hai lần transform cùng dữ liệu nên có cùng hashes facts/ratios/coverage dù run IDs khác nhau.
+Khi thực thi trên máy có giới hạn phần cứng (RAM < 16GB hoặc dung lượng đĩa hạn chế), khuyến nghị đóng gói dữ liệu và chạy trên Google Colab theo [hướng dẫn cloud execution](cloud-execution.md).
 
 Exit code: `0` tất cả group gates đã qua và mọi doanh nghiệp có snapshot; `2` config sai; `3` dữ liệu/gate còn blocked hoặc chờ review; `1` lỗi thực thi. Exit `3` là run đã được ghi nhận nhưng chưa đạt khả thi dữ liệu.
-
 ## Cách đọc kết quả
 
 Mở `feasibility.md` hoặc `feasibility.html`, sau đó kiểm tra `blockers_final.json`, `group_gates.json` và `coverage.json`. Manifest pin hash inputs/outputs và content hashes. `reconciliation.csv` bắt đầu ở trạng thái chờ đối chiếu, không tự điền giá trị expected hay phê duyệt. Chỉ sửa bản CSV kiểm tra theo workflow review được cấu hình; mọi approval phải tham chiếu đúng parent run, hashes, template và reviewer.
