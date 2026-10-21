@@ -1,6 +1,6 @@
 # Stage 01 — Pilot khả thi dữ liệu
 
-Trạng thái: đang triển khai; code và đường chạy offline có sẵn, cổng dữ liệu thật chưa đạt. Phụ thuộc: [stage 00](00-technical-foundation.md). Nguồn quy tắc: [dữ liệu PIT](../idea/04-point-in-time-data.md), [dictionary](../idea/02-universe-factors-ranking.md), [cổng pilot](../idea/05-portfolio-roadmap.md). Lần chạy local hiện tại bị chặn do chưa có `FRL_SEC_USER_AGENT`, roster chưa được xác minh lịch sử và chưa có đối chiếu độc lập.
+Trạng thái: đang triển khai; dữ liệu thô SEC thật đã thu thập xong 40/40 doanh nghiệp; đang chuyển bước parsing & đối chiếu độc lập. Phụ thuộc: [stage 00](00-technical-foundation.md). Nguồn quy tắc: [dữ liệu PIT](../idea/04-point-in-time-data.md), [dictionary](../idea/02-universe-factors-ranking.md), [cổng pilot](../idea/05-portfolio-roadmap.md). Đã gỡ bỏ blocker `FRL_SEC_USER_AGENT`, hệ thống đã có persistent cache index và hỗ trợ thực thi trên Cloud (Google Colab).
 
 ### Tiến độ implementation
 
@@ -8,11 +8,12 @@ Trạng thái: đang triển khai; code và đường chạy offline có sẵn, 
 - [x] Config strict, quota roster 40 mã, cutoff XNYS 16:00 ET, raw store có checksum, lineage facts/ratios, Parquet schemas và manifest v2.
 - [x] Parser filing gốc, quy tắc availability PIT, quarterly/YTD/TTM và tám ratios; fixtures offline kiểm tra các trường hợp biên.
 - [x] Tạo run blocked 160 cells và replay offline có content hashes ổn định; xem [pilot findings](../research/pilot-findings.md).
+- [x] Cấu hình contact trong `FRL_SEC_USER_AGENT`, bổ sung persistent cache index và hoàn thành thu thập dữ liệu thô SEC cho 40/40 doanh nghiệp (24.177 records).
+- [x] Cung cấp công cụ đóng gói dữ liệu thô (`scripts/pack_raw.py`) và notebook thực thi trên Cloud (`notebooks/01_colab_pilot_runner.ipynb`).
 - [ ] Xác minh bằng nguồn lịch sử roster, ticker/share class, membership và các cờ loss/merger/delisting; hiện CSV chỉ là roster ứng viên.
-- [ ] Cấu hình contact trong `FRL_SEC_USER_AGENT`, chạy ingestion SEC và xác nhận provider/cache trên dữ liệu thật.
+- [ ] Bóc tách facts, tính 8 ratios Point-in-Time và sinh artifact thật từ dữ liệu SEC đã tải.
 - [ ] Đối chiếu độc lập ít nhất 10 doanh nghiệp/6 nhóm, cập nhật expected values, người/ngày kiểm tra và chờ người dùng review trên run được pin.
 - [ ] Chỉ đánh giá và duyệt group gates sau khi có snapshots thật; audit toàn universe vẫn là cổng Stage 02 riêng.
-
 ## Mục tiêu và đầu vào
 
 Chứng minh có thể lấy raw data miễn phí, dựng snapshot đúng thời điểm và tính lõi ratios; xác định blockers trước xây toàn hệ thống. Đầu vào: môi trường locked, schema/manifest, 8 ratios lõi, calendar và cấu hình provider. Chưa tối ưu score, chưa so returns hoặc mở final test.
