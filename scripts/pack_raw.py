@@ -14,56 +14,53 @@ import zipfile
 
 def pack_bundle(data_dir: pathlib.Path, output_zip: pathlib.Path) -> None:
     raw_dir = data_dir / "raw"
-    if not raw_dir.exists():
-        print(f"Error: {raw_dir} does not exist.", file=sys.stderr)
+    cache_file = raw_dir / ".records_cache.json"
+    if not raw_dir.exists() or not cache_file.exists():
+        print(f"Error: {raw_dir} or {cache_file} does not exist.", file=sys.stderr)
         sys.exit(1)
 
-    print(f"Scanning files in {raw_dir}...")
+    print(f"Reading cache index from {cache_file}...")
     start_time = time.time()
-    
-    files_to_pack: list[pathlib.Path] = []
-    skipped_txt_count = 0
-    skipped_txt_bytes = 0
+    cache_data = json.loads(cache_file.read_text(encoding="utf-8"))
 
-    cache_file = raw_dir / ".records_cache.json"
-    if cache_file.exists():
-        files_to_pack.append(cache_file)
+    # Identify filing_text files to truncate to 64KB
+    filing_texts: set[str] = set()
+    for item in cache_data.values():
+        if item.get("kind") == "filing_text":
+            rel = item.get("relative_path")
+            if rel:
+                filing_texts.add(rel.replace("\\", "/"))
 
-    for p in (raw_dir / "sec").rglob("*"):
-        if not p.is_file():
-            continue
-        # Check if it's a huge SEC-DOCUMENT text file
-        s = p.stat().st_size
-        if s > 1024 * 1024:
-            try:
-                is_txt = (
-                    b"<SEC-DOCUMENT>" in head
-                    or b"<DOCUMENT>" in head
-                    or b"-----BEGIN PRIVACY" in head
-                )
-                if is_txt:
-                    skipped_txt_count += 1
-                    skipped_txt_bytes += s
-                    continue
-            except Exception:
-                pass
-        files_to_pack.append(p)
+    all_files = [p for p in (raw_dir / "sec").rglob("*") if p.is_file()]
+    print(f"Total files in sec directory: {len(all_files):,}")
+    print(f"Filing text headers to compress efficiently: {len(filing_texts):,}")
+    print(f"Writing optimized bundle to {output_zip} ...")
 
-    print(f"Selected {len(files_to_pack):,} files for packing.")
-    saved_gb = round(skipped_txt_bytes / (1024**3), 2)
-    print(f"Skipped {skipped_txt_count:,} text files ({saved_gb} GB saved).")
-    print(f"Writing compressed bundle to {output_zip} ...")
     output_zip.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(output_zip, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=5) as zf:
-        for i, f in enumerate(files_to_pack, 1):
-            arcname = f.relative_to(raw_dir)
-            zf.write(f, arcname)
-            if i % 2000 == 0 or i == len(files_to_pack):
-                print(f"Packed {i:,} / {len(files_to_pack):,} files...")
+        # 1. Write the cache index
+        zf.write(cache_file, ".records_cache.json")
+
+        # 2. Write all files
+        saved_bytes = 0
+        for i, p in enumerate(all_files, 1):
+            rel_str = p.relative_to(raw_dir).as_posix()
+            if rel_str in filing_texts:
+                # Store only the first 64KB for filing_text headers
+                content = p.read_bytes()[: 64 * 1024]
+                saved_bytes += max(0, p.stat().st_size - len(content))
+                zf.writestr(rel_str, content)
+            else:
+                zf.write(p, rel_str)
+
+            if i % 3000 == 0 or i == len(all_files):
+                print(f"Packed {i:,} / {len(all_files):,} files...")
 
     elapsed = round(time.time() - start_time, 1)
+    saved_gb = round(saved_bytes / (1024**3), 2)
     bundle_size_gb = round(output_zip.stat().st_size / (1024**3), 2)
-    print(f"SUCCESS! Created bundle {output_zip} ({bundle_size_gb} GB) in {elapsed}s.")
+    print(f"Skipped {saved_gb} GB of redundant text data!")
+    print(f"SUCCESS! Created optimized bundle {output_zip} ({bundle_size_gb} GB) in {elapsed}s.")
 
 
 if __name__ == "__main__":
