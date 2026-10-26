@@ -22,6 +22,9 @@ class FilingHeader(StrictModel):
     sic: str | None = None
 
 
+TARGET_TAGS: set[str] | None = None
+
+
 class Fact(StrictModel):
     entity_id: str
     accession: str
@@ -166,6 +169,8 @@ def parse_document(
                 if "/dei/" in namespace
                 else (element.prefix or "custom")
             )
+        if TARGET_TAGS is not None and tag not in TARGET_TAGS:
+            continue
         start, end, fact_dimensions = contexts[context_id]
         text = _text(element)
         unit_ref = _attr(element, "unitRef")

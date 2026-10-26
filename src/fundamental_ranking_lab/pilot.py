@@ -237,6 +237,24 @@ def _read_facts(
     facts: list[Fact] = []
     headers: dict[str, FilingHeader] = {}
     issues = []
+    from fundamental_ranking_lab import filings
+
+    filings.TARGET_TAGS = {
+        "Assets",
+        "StockholdersEquity",
+        "PreferredStockValue",
+        "RevenueFromContractWithCustomerExcludingAssessedTax",
+        "Revenues",
+        "SalesRevenueNet",
+        "NetIncomeLossAvailableToCommonStockholdersBasic",
+        "NetIncomeLoss",
+        "PreferredStockDividendsAndOtherAdjustments",
+        "LongTermDebtCurrent",
+        "LongTermDebtNoncurrent",
+        "ShortTermBorrowings",
+        "EntityCommonStockSharesOutstanding",
+        "CommonStockSharesOutstanding",
+    }
     entries = {entry.entity_id: entry for entry in roster}
     for record in records:
         if record.kind == "filing_text" and record.accession:
