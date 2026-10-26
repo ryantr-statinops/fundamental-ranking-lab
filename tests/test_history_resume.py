@@ -3,9 +3,9 @@ from pathlib import Path
 
 import httpx
 import pytest
-from tests.test_history_ingest import make_config
 
 from fundamental_ranking_lab.history import ingest
+from tests.test_history_ingest import make_config
 
 
 def test_failed_source_keeps_checkpoint_and_resume_skips_success(

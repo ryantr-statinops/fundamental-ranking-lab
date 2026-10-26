@@ -1,10 +1,10 @@
 from datetime import UTC, date, datetime
 
 import exchange_calendars as xcals
-from tests.test_universe import bundle, evidence
 
 from fundamental_ranking_lab.history_contracts import Price
 from fundamental_ranking_lab.history_market import market_filters, normalize_events
+from tests.test_universe import bundle, evidence
 
 
 def test_missing_prices_shares_and_quarters_are_explicit() -> None:

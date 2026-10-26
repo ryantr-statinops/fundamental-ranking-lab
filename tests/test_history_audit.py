@@ -2,12 +2,12 @@ import json
 from pathlib import Path
 
 import pytest
-from tests.test_history_ingest import make_config
 from typer.testing import CliRunner
 
 from fundamental_ranking_lab.cli import app
 from fundamental_ranking_lab.history import ingest
 from fundamental_ranking_lab.history_audit import audit
+from tests.test_history_ingest import make_config
 
 
 def test_end_to_end_audit_is_offline_and_never_approves_fixtures(

@@ -13,6 +13,7 @@ from contextlib import suppress
 from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
 from pathlib import Path
+from typing import Any
 from urllib.parse import urlparse
 
 import httpx
@@ -119,6 +120,7 @@ class RawStore:
         self._cache[url] = record.model_dump(mode="json")
         self._save_cache()
         return record
+
     def read(self, record: RawRecord) -> bytes:
         target = (self.root / record.relative_path).resolve()
         if not target.is_relative_to(self.root):

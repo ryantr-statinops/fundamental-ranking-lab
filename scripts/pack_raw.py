@@ -5,11 +5,13 @@ Filters out giant full-text submission files (<SEC-DOCUMENT> .txt) while preserv
 - All metadata JSON files (submissions, facts, index)
 - The persistent index cache (.records_cache.json)
 """
+
 import json
 import pathlib
 import sys
 import time
 import zipfile
+
 
 def pack_bundle(data_dir: pathlib.Path, output_zip: pathlib.Path) -> None:
     raw_dir = data_dir / "raw"

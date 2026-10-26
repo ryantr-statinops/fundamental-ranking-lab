@@ -244,10 +244,13 @@ def _read_facts(
                 headers[record.accession] = parse_header(store.read(record), record.accession)
             except ValueError:
                 issues.append({"entity_id": record.entity_id, "reason": "invalid_filing_header"})
-    filing_docs = [r for r in records if r.kind == "filing_document" and r.accession in headers]
+    filing_docs = [
+        r for r in records if r.kind == "filing_document" and r.accession and r.accession in headers
+    ]
     total_docs = len(filing_docs)
     print(f"Parsing {total_docs:,} filing documents into accounting facts...")
     for idx, record in enumerate(filing_docs, 1):
+        assert record.accession is not None
         entry = entries[record.entity_id]
         parsed, problems = parse_document(
             store.read(record),
@@ -259,7 +262,8 @@ def _read_facts(
         facts.extend(parsed)
         issues.extend({"entity_id": entry.entity_id, "reason": problem} for problem in problems)
         if idx % 1000 == 0 or idx == total_docs:
-            print(f"  Parsed {idx:,} / {total_docs:,} documents ({len(facts):,} facts extracted)...")
+            pct = f"{idx:,} / {total_docs:,}"
+            print(f"  Parsed {pct} documents ({len(facts):,} facts extracted)...")
     unique = {canonical_sha256(fact.model_dump(mode="json")): fact for fact in facts}
     return [unique[key] for key in sorted(unique)], headers, issues
 
