@@ -266,7 +266,7 @@ def _read_facts(
         r for r in records if r.kind == "filing_document" and r.accession and r.accession in headers
     ]
     total_docs = len(filing_docs)
-    print(f"Parsing {total_docs:,} filing documents into accounting facts...")
+    print(f"\n[1/3] Đang bóc tách {total_docs:,} tài liệu XML/XBRL...", flush=True)
     for idx, record in enumerate(filing_docs, 1):
         assert record.accession is not None
         entry = entries[record.entity_id]
@@ -280,8 +280,12 @@ def _read_facts(
         facts.extend(parsed)
         issues.extend({"entity_id": entry.entity_id, "reason": problem} for problem in problems)
         if idx % 1000 == 0 or idx == total_docs:
-            pct = f"{idx:,} / {total_docs:,}"
-            print(f"  Parsed {pct} documents ({len(facts):,} facts extracted)...")
+            progress = int((idx / total_docs) * 100)
+            print(
+                f"  -> Tiến độ: {progress:>3}% ({idx:,} / {total_docs:,} docs) | "
+                f"Đã trích xuất {len(facts):,} facts",
+                flush=True,
+            )
     unique = {canonical_sha256(fact.model_dump(mode="json")): fact for fact in facts}
     return [unique[key] for key in sorted(unique)], headers, issues
 
