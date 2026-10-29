@@ -31,3 +31,16 @@ def test_evidence_requires_public_utc_time_and_interval() -> None:
         Evidence.model_validate({**row, "known_at": "2009-01-01T00:00:00"})
     with pytest.raises(ValidationError):
         Evidence.model_validate({**row, "valid_to": "2008-01-01"})
+
+
+def test_history_config_loads_approved_groups() -> None:
+    from pathlib import Path
+
+    from fundamental_ranking_lab.history_config import load_history_config
+
+    config_path = Path(__file__).resolve().parents[1] / "configs" / "history.toml"
+    config = load_history_config(config_path)
+    assert len(config.history.approved_groups) == 6
+    assert "General" in config.history.approved_groups
+    assert "Bank" in config.history.approved_groups
+    assert "Insurance" in config.history.approved_groups
