@@ -112,3 +112,43 @@ def test_stock_split_corporate_action_normalization() -> None:
     assert events[0]["attributes"]["action_type"] == "split"
     assert events[0]["attributes"]["ratio"] == "4.0"
     assert events[0]["valid_from"] == "2020-08-31"
+
+
+def test_adv20_liquidity_threshold_filters_insufficient_volume() -> None:
+    cutoff = datetime(2010, 3, 31, 20, tzinfo=UTC)
+    calendar = xcals.get_calendar("XNYS", start="2010-01-01", end="2010-12-31")
+    sessions = calendar.sessions_in_range("2010-03-01", "2010-03-31")[-20:]
+    rows = [
+        evidence(
+            "filing",
+            f"q-{year}-{month}",
+            attributes={"form": "10-Q", "period_end": f"{year}-{month:02d}-01"},
+        )
+        for year in (2007, 2008)
+        for month in (3, 6, 9, 12)
+    ]
+    rows.append(
+        evidence("share", "shares-low", security_id="low-vol", attributes={"shares": "1000"})
+    )
+    # 20 sessions but 0 volume -> ADV = 0
+    prices = [
+        Price(
+            security_id="low-vol",
+            session=s.date(),
+            known_at=s.to_pydatetime().replace(tzinfo=UTC),
+            close="10",
+            volume="0",
+            currency="USD",
+            convention="verified_raw",
+            raw_sha256="0" * 64,
+        )
+        for s in sessions
+    ]
+    sample = bundle(rows).model_copy(update={"prices": tuple(prices)})
+    universe = [{"security_id": "low-vol", "entity_id": "e", "issues": []}]
+    result = market_filters(sample, cutoff, universe)
+    assert len(result) == 1
+    assert result[0]["security_id"] == "low-vol"
+    assert result[0]["adv20_usd"] == "0"
+    assert not result[0]["hard_filters_pass"]
+    assert "adv20_below_threshold" in result[0]["issues"]
