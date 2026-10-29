@@ -185,9 +185,11 @@ def parse_document(
             supported = {
                 "",
                 "num-dot-decimal",
+                "numdotdecimal",
                 "numcommadot",
                 "num-dot-decimal-in",
                 "numdash",
+                "zerodash",
                 "fixed-zero",
             }
             if transform not in supported:
@@ -196,7 +198,7 @@ def parse_document(
             cleaned = (
                 text.replace(",", "").replace("\u00a0", "").replace(" ", "").replace("\u2212", "-")
             )
-            if transform in {"numdash", "fixed-zero"}:
+            if transform in {"numdash", "zerodash", "fixed-zero"}:
                 cleaned = "0"
             if cleaned.startswith("(") and cleaned.endswith(")"):
                 cleaned = "-" + cleaned[1:-1]
