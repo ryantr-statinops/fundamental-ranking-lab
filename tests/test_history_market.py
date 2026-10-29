@@ -88,3 +88,27 @@ def test_adv_tie_break_missing_session_and_currency() -> None:
     prices[0] = prices[0].model_copy(update={"currency": "EUR"})
     sample = sample.model_copy(update={"prices": tuple(prices)})
     assert "currency_unverified" in market_filters(sample, cutoff, universe)[0]["issues"]
+
+
+def test_stock_split_corporate_action_normalization() -> None:
+    # Test a 4-for-1 stock split (ratio = 4.0)
+    split_event = evidence(
+        "event",
+        "split-4-1",
+        security_id="apple-sec",
+        valid_from="2020-08-31",
+        attributes={
+            "action_type": "split",
+            "ratio": "4.0",
+            "verified": "true",
+        },
+    )
+    events, unresolved = normalize_events(
+        bundle([split_event]), datetime(2020, 12, 31, 21, tzinfo=UTC)
+    )
+    assert len(unresolved) == 0
+    assert len(events) == 1
+    assert events[0]["resolved"] is True
+    assert events[0]["attributes"]["action_type"] == "split"
+    assert events[0]["attributes"]["ratio"] == "4.0"
+    assert events[0]["valid_from"] == "2020-08-31"
