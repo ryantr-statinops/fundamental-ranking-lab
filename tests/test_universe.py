@@ -128,3 +128,35 @@ def test_orphan_listing_is_preserved_as_unresolved_candidate() -> None:
     )
     assert output[0]["membership"] == "unresolved"
     assert output[0]["issues"] == ["security_definition_missing"]
+
+
+def test_ticker_transition_preserves_historical_asof() -> None:
+    # Example: FB transitioned to META on 2022-06-09
+    fb = evidence(
+        "identifier",
+        "fb-ticker",
+        security_id="meta-sec",
+        entity_id="meta-corp",
+        valid_from="2012-05-18",
+        valid_to="2022-06-08",
+        attributes={"type": "ticker", "value": "FB"},
+    )
+    meta = evidence(
+        "identifier",
+        "meta-ticker",
+        security_id="meta-sec",
+        entity_id="meta-corp",
+        valid_from="2022-06-09",
+        attributes={"type": "ticker", "value": "META"},
+    )
+    # In 2020 (before transition), as-of query must resolve to FB
+    cutoff_2020 = datetime(2020, 12, 31, 21, tzinfo=UTC)
+    asof_2020 = asof((fb, meta), cutoff_2020)
+    assert len(asof_2020) == 1
+    assert asof_2020[0].attributes["value"] == "FB"
+
+    # In 2023 (after transition), as-of query must resolve to META
+    cutoff_2023 = datetime(2023, 12, 31, 21, tzinfo=UTC)
+    asof_2023 = asof((fb, meta), cutoff_2023)
+    assert len(asof_2023) == 1
+    assert asof_2023[0].attributes["value"] == "META"
