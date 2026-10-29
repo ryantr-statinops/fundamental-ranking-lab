@@ -51,3 +51,29 @@ def test_cli_rejects_missing_config_and_conflicting_modes() -> None:
         ).exit_code
         == 2
     )
+
+
+def test_audit_universe_cli_smoke_checks_parquet_outputs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("httpx.Client.get", lambda *a, **k: pytest.fail("offline network"))
+    config = make_config(tmp_path)
+    fixture = Path("tests/fixtures/history")
+    for name in ("bundle.json", "source.txt"):
+        (tmp_path / name).write_bytes((fixture / name).read_bytes())
+    with config.open("a") as stream:
+        stream.write('signal_start="2010-01-01"\nsignal_end="2010-03-31"\n')
+    code, ingest_run = ingest(config)
+    assert code == 3
+    runner = CliRunner()
+    res = runner.invoke(
+        app, ["audit-universe", "--config", str(config), "--input-run", ingest_run.name]
+    )
+    assert res.exit_code == 3
+    artifacts = list((tmp_path / "artifacts").iterdir())
+    audit_runs = [
+        d for d in artifacts if d != ingest_run and d.is_dir() and not d.name.startswith(".")
+    ]
+    assert len(audit_runs) >= 1
+    parquets = list(audit_runs[0].glob("*.parquet"))
+    assert len(parquets) == 12
