@@ -2,7 +2,7 @@
 
 `docs/` tách mục tiêu nghiên cứu, kế hoạch thực hiện, thiết kế kỹ thuật, bằng chứng và hướng dẫn sử dụng. Ngày tổ chức: 2026-10-16.
 
-**Trạng thái hiện tại:** research specification đã có; Stage 00 nền tảng đạt cổng. Stage 01 đã cấu hình contact SEC và hoàn tất thu thập dữ liệu thô SEC thật cho toàn bộ 40/40 doanh nghiệp (24.177 records); hiện đang chuyển sang bước bóc tách dữ liệu và đối chiếu độc lập (reconciliation). Đã bổ sung workflow thực thi trên Google Colab để tối ưu hóa tài nguyên phần cứng.
+**Trạng thái hiện tại:** research specification đã có; Stage 00 & Stage 01 đã đạt cổng nghiệm thu (Passed Gate). Stage 01 đã hoàn tất toàn bộ thu thập dữ liệu thô SEC thật cho 40 doanh nghiệp (24.177 records), bóc tách 372.103 facts kế toán, 1.280 ratios Point-in-Time, đối chiếu độc lập sai lệch 0.00 và phê duyệt 100% 6 nhóm ngành Group Gates. Sẵn sàng chuyển tiếp sang đóng gói Open Dataset và triển khai Stage 02/03.
 
 ## Các nhóm tài liệu
 

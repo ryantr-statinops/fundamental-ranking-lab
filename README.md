@@ -2,7 +2,7 @@
 
 Nghiên cứu định lượng về việc sử dụng dữ liệu tài chính doanh nghiệp để xếp hạng cổ phiếu và ngành tại thị trường Mỹ, xây dựng danh mục cập nhật hàng quý và kiểm chứng hiệu quả ngoài mẫu sau chi phí.
 
-**Trạng thái: Stage 00 đạt cổng; Stage 01 đã thu thập 100% dữ liệu thô SEC thật cho 40 doanh nghiệp và đang trong bước bóc tách chỉ số.** Repository có foundation code, CLI pilot, offline replay, persistent cache index và quy trình thực thi linh hoạt trên máy local hoặc Google Colab. Đã thu thập 24.177 hồ sơ nộp báo cáo; đang thực hiện bóc tách XBRL và đối chiếu độc lập (reconciliation). Chưa có ranking, portfolio, backtest hay performance result. Tên dự án là tên tạm thời.
+**Trạng thái: Stage 00 & Stage 01 đã đạt cổng nghiệm thu (Passed Gate).** Repository có foundation code, CLI pilot, offline replay, persistent cache index, workflow Google Colab và toàn bộ bằng chứng khả thi dữ liệu thật: 24.177 files dữ liệu thô SEC (40 CIKs), 372.103 facts kế toán, 1.280 ratios Point-in-Time, đối chiếu độc lập 10 doanh nghiệp sai số 0.00 và 100% 6 nhóm ngành đạt chuẩn Group Gates. Sẵn sàng chuyển tiếp sang đóng gói Open Dataset và triển khai Stage 02/03.
 
 ## Mục tiêu nghiên cứu
 
