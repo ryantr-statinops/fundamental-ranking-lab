@@ -2,7 +2,7 @@
 
 Nghiên cứu định lượng về việc sử dụng dữ liệu tài chính doanh nghiệp để xếp hạng cổ phiếu và ngành tại thị trường Mỹ, xây dựng danh mục cập nhật hàng quý và kiểm chứng hiệu quả ngoài mẫu sau chi phí.
 
-**Trạng thái: Stage 00 & Stage 01 đã đạt cổng nghiệm thu (Passed Gate).** Repository có foundation code, CLI pilot, offline replay, persistent cache index, workflow Google Colab và toàn bộ bằng chứng khả thi dữ liệu thật: 24.177 files dữ liệu thô SEC (40 CIKs), 372.103 facts kế toán, 1.280 ratios Point-in-Time, đối chiếu độc lập 10 doanh nghiệp sai số 0.00 và 100% 6 nhóm ngành đạt chuẩn Group Gates. Sẵn sàng chuyển tiếp sang đóng gói Open Dataset và triển khai Stage 02/03.
+**Trạng thái: Stage 00 & Stage 01 đã đạt cổng nghiệm thu (Passed Gate); Stage 02 đang hoàn thiện tích hợp universe lịch sử.** Repository có foundation code, CLI pilot, offline replay, persistent cache index, workflow Google Colab, bộ Open Dataset trên Hugging Face và pipeline Universe lịch sử (as-of ticker transitions, Ken French 17 industries, split/dividend adjustments, ADV20 liquidity filters).
 
 ## Mục tiêu nghiên cứu
 
