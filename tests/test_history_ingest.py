@@ -63,3 +63,17 @@ def test_pinned_raw_corruption_never_falls_back_to_network(
     raw.unlink()
     with pytest.raises(SourceError):
         ingest(config, input_run=run.name)
+
+
+def test_ingest_smoke_generates_manifest_and_raw_index(tmp_path: Path) -> None:
+    config = make_config(tmp_path)
+    fixture = Path("tests/fixtures/history")
+    for name in ("bundle.json", "source.txt"):
+        (tmp_path / name).write_bytes((fixture / name).read_bytes())
+    code, run = ingest(config)
+    assert code == 3
+    assert (run / "manifest.json").exists()
+    assert (run / "raw_index.json").exists()
+    assert (run / "discovery.json").exists()
+    records = json.loads((run / "raw_index.json").read_bytes())
+    assert len(records) > 0
