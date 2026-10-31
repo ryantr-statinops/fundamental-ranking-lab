@@ -120,3 +120,30 @@ def rank_command(
 
     typer.echo(f"Ranking output generated at: {destination}")
     raise typer.Exit(code=code)
+
+
+@app.command("portfolio")
+def portfolio_command(
+    input_ranking: Annotated[
+        Path,
+        typer.Option("--input-ranking", help="Path to ranking output directory."),
+    ],
+    output_dir: Annotated[
+        Path | None,
+        typer.Option("--output-dir", help="Target output directory for portfolio tables."),
+    ] = None,
+) -> None:
+    """Construct portfolio target weights with industry tilt and water-filling caps."""
+    from fundamental_ranking_lab.portfolio import run_portfolio_construction
+
+    try:
+        code, destination = run_portfolio_construction(input_ranking, output_dir)
+    except FileNotFoundError as exc:
+        typer.echo(f"Portfolio input failure: {exc}", err=True)
+        raise typer.Exit(code=2) from None
+    except Exception as exc:
+        typer.echo(f"Portfolio failure: {type(exc).__name__}", err=True)
+        raise typer.Exit(code=1) from None
+
+    typer.echo(f"Portfolio output generated at: {destination}")
+    raise typer.Exit(code=code)

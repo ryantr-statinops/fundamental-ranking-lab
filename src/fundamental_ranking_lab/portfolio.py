@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from decimal import Decimal
+from pathlib import Path
 from typing import Any
 
 
@@ -244,3 +245,69 @@ def solve_self_financing_execution(
     cash_after = v_plus - total_stock_value
 
     return v_plus, fee, new_holdings, cash_after
+
+
+def run_portfolio_construction(
+    input_ranking_dir: Path,
+    output_dir: Path | None = None,
+) -> tuple[int, Path]:
+    """Construct portfolio target weights from Stage 04 ranking outputs."""
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    from fundamental_ranking_lab.portfolio_contracts import TARGET_WEIGHTS_SCHEMA
+    from fundamental_ranking_lab.storage import write_parquet_atomic
+
+    cands_path = input_ranking_dir / "top_candidates.parquet"
+    ind_path = input_ranking_dir / "industry_ranking.parquet"
+
+    if not cands_path.exists():
+        raise FileNotFoundError(f"Missing top_candidates.parquet in {input_ranking_dir}")
+    if not ind_path.exists():
+        raise FileNotFoundError(f"Missing industry_ranking.parquet in {input_ranking_dir}")
+
+    dest = output_dir or (input_ranking_dir / "portfolio")
+    dest.mkdir(parents=True, exist_ok=True)
+
+    cands_df = pq.read_table(cands_path).to_pandas()  # type: ignore[no-untyped-call]
+    ind_df = pq.read_table(ind_path).to_pandas()  # type: ignore[no-untyped-call]
+
+    all_targets: list[dict[str, Any]] = []
+
+    cutoffs_list = sorted(cands_df["cutoff"].unique())
+    for cutoff_ts in cutoffs_list:
+        sub_cands = cands_df[cands_df["cutoff"] == cutoff_ts].to_dict(orient="records")
+        sub_ind = ind_df[ind_df["cutoff"] == cutoff_ts].to_dict(orient="records")
+
+        # 1. Compute industry tilts
+        tilts = compute_industry_tilts(sub_ind)
+
+        # 2. Compute raw weights with tilt
+        items_with_raw = compute_raw_weights(sub_cands, tilts)
+
+        # 3. Water-filling caps (stock 5%, sector 20%)
+        allocated, _residual_cash = apply_water_filling_caps(items_with_raw)
+
+        for item in allocated:
+            all_targets.append(
+                {
+                    "cutoff": item["cutoff"],
+                    "entity_id": item["entity_id"],
+                    "security_id": item["security_id"],
+                    "industry": item["industry"],
+                    "group": item["group"],
+                    "raw_score": str(item["raw_score"]),
+                    "industry_tilt": str(item["industry_tilt"]),
+                    "raw_weight": str(item["raw_weight"]),
+                    "target_weight": str(item["target_weight"]),
+                    "cap_binding": item["cap_binding"],
+                }
+            )
+
+    write_parquet_atomic(
+        pa.Table.from_pylist(all_targets, schema=TARGET_WEIGHTS_SCHEMA),
+        dest / "target_weights.parquet",
+        TARGET_WEIGHTS_SCHEMA,
+    )
+
+    return 0, dest
