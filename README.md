@@ -2,7 +2,7 @@
 
 Nghiên cứu định lượng về việc sử dụng dữ liệu tài chính doanh nghiệp để xếp hạng cổ phiếu và ngành tại thị trường Mỹ, xây dựng danh mục cập nhật hàng quý và kiểm chứng hiệu quả ngoài mẫu sau chi phí.
 
-**Trạng thái: Stage 00 & Stage 01 đã đạt cổng nghiệm thu (Passed Gate); Stage 02, Stage 04 & Stage 05 đã có baseline hoàn thiện.** Repository có foundation code, CLI pilot, offline replay, persistent cache index, workflow Google Colab, bộ Open Dataset trên Hugging Face, pipeline Universe lịch sử, CLI `frl rank` xếp hạng 4 trục và CLI `frl portfolio` xây dựng danh mục theo thuật toán nghiêng ngành $\lambda=0.5$ và water-filling caps (trần doanh nghiệp 5%, ngành 20%).
+**Trạng thái: Stage 00 & Stage 01 đã đạt cổng nghiệm thu (Passed Gate); Stage 02, Stage 04 & Stage 05 đã hoàn thành baseline.** Repository có foundation code, CLI pilot, offline replay, persistent cache index, workflow Google Colab, bộ Open Dataset trên Hugging Face, pipeline Universe lịch sử, CLI `frl rank` xếp hạng 4 trục và CLI `frl portfolio` xây dựng danh mục theo thuật toán nghiêng ngành $\lambda=0.5$ và water-filling caps (trần 5% cổ phiếu, 20% ngành). Đã có công cụ trực quan hóa và báo cáo danh mục tại [`reports/portfolio/PORTFOLIO_REPORT.md`](reports/portfolio/PORTFOLIO_REPORT.md).
 
 ## Mục tiêu nghiên cứu
 
@@ -52,8 +52,9 @@ Cutoff là 16:00 `America/New_York` vào ngày giao dịch cuối quý; giao d�
 | Danh sách cổ phiếu | Candidate pool, scores, thứ hạng, lý do chọn/loại và cờ dữ liệu |
 | Danh mục | Holdings, tỷ trọng trước/sau giới hạn, tiền mặt và chi phí |
 | Báo cáo nghiên cứu | Ranking metrics, lợi nhuận gross/net, rủi ro, turnover, concentration, kiểm định và giới hạn kết luận |
+| Báo cáo trực quan | Visual Portfolio Report (biểu đồ phân bổ tròn, bar chart điểm số composite và bảng hạch toán caps) |
 
-Các đầu ra này là mục tiêu triển khai, chưa phải artifacts đã có trong repository.
+Các đầu ra này hiện đã có baseline thực thi và artifact minh chứng trong repository.
 
 ## Dữ liệu và nguyên tắc kiểm chứng
 
@@ -113,9 +114,10 @@ uv run ruff check .
 uv run ruff format --check .
 uv run mypy src
 ```
+`frl doctor` kiểm tra runtime và config. Hệ thống đã hỗ trợ đầy đủ chuỗi lệnh CLI:
+- `uv run frl pilot --config configs/pilot.toml`: Thu thập và trích xuất chỉ số Point-in-Time.
+- `uv run frl rank --input-run artifacts/<run_id>`: Chuẩn hóa percentile và xếp hạng 4 trục.
+- `uv run frl portfolio --input-ranking artifacts/<run_id>/ranking`: Xây dựng danh mục phân bổ vốn tối ưu.
+- `uv run python scripts/generate_report.py --ranking-dir artifacts/<run_id>/ranking`: Tự động vẽ biểu đồ và xuất báo cáo danh mục trực quan.
 
-`frl doctor` chỉ đọc runtime và config. Lệnh pilot đã có nhưng lần chạy live hiện chưa thể gọi SEC cho tới khi bạn thiết lập contact local; cách làm và replay ghi ở [hướng dẫn chạy pipeline](docs/guides/running-pipeline.md). Ranking, portfolio và backtest chưa khả dụng. Xem thêm [hướng dẫn setup](docs/guides/setup.md), [configuration](docs/guides/configuration.md), [technical architecture](docs/technical/architecture.md) và [pilot findings](docs/research/pilot-findings.md).
-
-Khi thay đổi thiết kế, cập nhật tài liệu nguồn trong `docs/idea`, sổ quyết định và bảng tham số; README này giữ vai trò tổng quan.
-
-Stage 02 có `frl ingest` và `frl audit-universe` cho fixtures/replay, chưa đạt cổng dữ liệu thật. Xem [hướng dẫn historical universe](docs/guides/historical-universe.md) để chạy mà không cần SEC contact; fixtures không mở quyền kết luận performance.
+Xem thêm [Báo cáo danh mục trực quan](reports/portfolio/PORTFOLIO_REPORT.md), [Hugging Face Open Dataset](https://huggingface.co/datasets/ryantr/us-equities-sec-fundamentals), [hướng dẫn chạy pipeline](docs/guides/running-pipeline.md) và [hướng dẫn cloud execution](docs/guides/cloud-execution.md).
