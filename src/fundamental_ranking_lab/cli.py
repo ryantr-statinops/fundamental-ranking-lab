@@ -93,3 +93,30 @@ def pilot_command(
     typer.echo(f"Pilot run: {destination}")
     typer.echo(f"Exit code: {code}; see manifest.json, feasibility.md and blockers_final.json.")
     raise typer.Exit(code=code)
+
+
+@app.command("rank")
+def rank_command(
+    input_run: Annotated[
+        Path,
+        typer.Option("--input-run", help="Path to pilot run directory with ratios.parquet."),
+    ],
+    output_dir: Annotated[
+        Path | None,
+        typer.Option("--output-dir", help="Target output directory for ranking tables."),
+    ] = None,
+) -> None:
+    """Compute cross-sectional percentile scores, industry ranks, and top-100 candidates."""
+    from fundamental_ranking_lab.ranking import run_ranking
+
+    try:
+        code, destination = run_ranking(input_run, output_dir)
+    except FileNotFoundError as exc:
+        typer.echo(f"Ranking input failure: {exc}", err=True)
+        raise typer.Exit(code=2) from None
+    except Exception as exc:
+        typer.echo(f"Ranking failure: {type(exc).__name__}", err=True)
+        raise typer.Exit(code=1) from None
+
+    typer.echo(f"Ranking output generated at: {destination}")
+    raise typer.Exit(code=code)

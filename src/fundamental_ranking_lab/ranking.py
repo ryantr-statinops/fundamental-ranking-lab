@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections import defaultdict
 from datetime import datetime
 from decimal import Decimal
+from pathlib import Path
 from typing import Any
 
 
@@ -143,7 +144,7 @@ def rank_industries(
         total_counts[ind] += 1
         comp = stock.get("composite_score")
         if comp is not None and stock.get("eligible", False):
-            by_industry[ind].append(comp)
+            by_industry[ind].append(Decimal(str(comp)))
 
     industry_stats = []
     for ind, total in total_counts.items():
@@ -265,3 +266,129 @@ def select_top_candidates(
             break
 
     return selected
+
+
+def run_ranking(input_run_path: Path, output_dir: Path | None = None) -> tuple[int, Path]:
+    """Execute cross-sectional ranking pipeline on an existing pilot run."""
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    from fundamental_ranking_lab.ranking_contracts import (
+        CANDIDATE_SELECTION_SCHEMA,
+        INDUSTRY_RANKING_SCHEMA,
+        STOCK_SCORE_SCHEMA,
+    )
+    from fundamental_ranking_lab.storage import write_parquet_atomic
+
+    ratios_path = input_run_path / "ratios.parquet"
+    if not ratios_path.exists():
+        raise FileNotFoundError(f"Missing ratios.parquet in {input_run_path}")
+
+    dest = output_dir or (input_run_path / "ranking")
+    dest.mkdir(parents=True, exist_ok=True)
+
+    ratios_table = pq.read_table(ratios_path)  # type: ignore[no-untyped-call]
+    df = ratios_table.to_pandas()
+
+    all_stock_scores: list[dict[str, Any]] = []
+    all_industry_rankings: list[dict[str, Any]] = []
+    all_candidates: list[dict[str, Any]] = []
+
+    # Group by cutoff
+    cutoffs_list = sorted(df["cutoff"].unique())
+    for cutoff_ts in cutoffs_list:
+        cutoff_dt = cutoff_ts.to_pydatetime()
+        sub_df = df[df["cutoff"] == cutoff_ts]
+
+        # 1. Percentile rank each ratio
+        ratio_percentiles: dict[str, dict[str, Decimal | None]] = {}
+        for ratio_name, is_high in RATIO_DIRECTIONS.items():
+            ratio_sub = sub_df[sub_df["ratio"] == ratio_name]
+            val_dict: dict[Any, Decimal | None] = {}
+            for _, row in ratio_sub.iterrows():
+                val_raw = row["value_decimal"]
+                val = None
+                if val_raw is not None and str(val_raw).lower() != "nan":
+                    try:
+                        d = Decimal(str(val_raw))
+                        if d.is_finite():
+                            val = d
+                    except Exception:
+                        val = None
+                val_dict[row["entity_id"]] = val
+            ratio_percentiles[ratio_name] = percentile_rank(val_dict, higher_is_better=is_high)
+
+        # 2. Compute axis & composite scores per stock
+        entities = sorted(sub_df["entity_id"].unique())
+        cutoff_scores = []
+        for ent in entities:
+            ent_ratios = {r_name: ratio_percentiles[r_name].get(ent) for r_name in RATIO_DIRECTIONS}
+            axes, composite, valid_count = compute_axes_and_composite(ent_ratios)
+            cutoff_scores.append(
+                {
+                    "cutoff": cutoff_dt,
+                    "entity_id": ent,
+                    "security_id": ent.upper(),
+                    "industry": "Other",
+                    "group": "General",
+                    "quality_score": str(axes["quality"]) if axes["quality"] is not None else None,
+                    "growth_score": str(axes["growth"]) if axes["growth"] is not None else None,
+                    "health_score": (
+                        str(axes["financial_health"])
+                        if axes["financial_health"] is not None
+                        else None
+                    ),
+                    "valuation_score": (
+                        str(axes["valuation"]) if axes["valuation"] is not None else None
+                    ),
+                    "composite_score": str(composite) if composite is not None else None,
+                    "valid_axes": valid_count,
+                    "eligible": composite is not None,
+                    "missing_reason": "insufficient_axes" if composite is None else None,
+                }
+            )
+        all_stock_scores.extend(cutoff_scores)
+
+        # 3. Industry ranking
+        valid_comps = [
+            Decimal(str(s["composite_score"]))
+            for s in cutoff_scores
+            if s["composite_score"] is not None
+        ]
+        univ_median, _ = _median_and_iqr(valid_comps)
+        ind_ranks = rank_industries(cutoff_scores, cutoff_dt, universe_median_composite=univ_median)
+        for r in ind_ranks:
+            r["median_composite"] = (
+                str(r["median_composite"]) if r["median_composite"] is not None else None
+            )
+            r["iqr_composite"] = str(r["iqr_composite"]) if r["iqr_composite"] is not None else None
+            r["breadth_above_universe_median"] = (
+                str(r["breadth_above_universe_median"])
+                if r["breadth_above_universe_median"] is not None
+                else None
+            )
+        all_industry_rankings.extend(ind_ranks)
+
+        # 4. Top candidates
+        cands = select_top_candidates(cutoff_scores, cutoff_dt, top_k=100)
+        for c in cands:
+            c["composite_score"] = str(c["composite_score"])
+        all_candidates.extend(cands)
+
+    write_parquet_atomic(
+        pa.Table.from_pylist(all_stock_scores, schema=STOCK_SCORE_SCHEMA),
+        dest / "scores.parquet",
+        STOCK_SCORE_SCHEMA,
+    )
+    write_parquet_atomic(
+        pa.Table.from_pylist(all_industry_rankings, schema=INDUSTRY_RANKING_SCHEMA),
+        dest / "industry_ranking.parquet",
+        INDUSTRY_RANKING_SCHEMA,
+    )
+    write_parquet_atomic(
+        pa.Table.from_pylist(all_candidates, schema=CANDIDATE_SELECTION_SCHEMA),
+        dest / "top_candidates.parquet",
+        CANDIDATE_SELECTION_SCHEMA,
+    )
+
+    return 0, dest
