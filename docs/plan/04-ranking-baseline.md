@@ -1,23 +1,17 @@
 # Stage 04 — Eligibility, scoring và ranking baseline
 
-Trạng thái: chưa bắt đầu. Phụ thuộc: [stage 03](03-point-in-time-features.md). Quy tắc gốc: [universe/factors/ranking](../idea/02-universe-factors-ranking.md).
+Trạng thái: **Đã triển khai baseline ranking & candidate selection**. Phụ thuộc: [stage 01](01-data-feasibility-pilot.md) đã đạt cổng và trích xuất ratios Point-in-Time. Quy tắc gốc: [universe/factors/ranking](../idea/02-universe-factors-ranking.md).
+
+### Tiến độ implementation:
+- [x] Xây dựng Data Contracts & Parquet Schemas cho Ranking (`StockScore`, `IndustryRanking`, `CandidateSelection`).
+- [x] Hiện thực chuẩn hóa vị thế tương đối `percentile_rank()` theo công thức Fractional Mid-Rank: $\frac{\text{midrank}-1}{n-1}$ kèm đảo chiều Low-is-Good (debt_ratio).
+- [x] Hiện thực tính điểm 4 trục (`Quality`, `Growth`, `Financial Health`, `Valuation`) và tổng hợp `Core Composite Score` với ngưỡng tối thiểu $\ge 3/4$ trục.
+- [x] Hiện thực xếp hạng 17 ngành Ken French bằng Median Composite của các cổ phiếu eligible.
+- [x] Hiện thực thuật toán chọn Top-100 cổ phiếu `select_top_candidates()` với cơ chế xử lý ranh giới Border Ties Inclusion.
+- [x] Tích hợp lệnh CLI `uv run frl rank --input-run <run_path>` xuất đủ 3 bảng Parquet: `scores.parquet`, `industry_ranking.parquet`, `top_candidates.parquet`.
+- [x] Smoke check trực tiếp trên run thật của Stage 01 (`20261028T162118.392055Z-0671bf04-5bfd-445a-9bc8-f09ce09bf762`).
 
 ## Mục tiêu và đầu vào
-
-Tạo ranking cổ phiếu/ngành và candidate pool độc lập future returns. Đầu vào: historical membership, hard-filter data, approved group gates, raw_ratios và coverage đã pin. Không gọi provider hoặc load forward returns trong scoring module.
-
-## Công việc
-
-1. Áp identity/listing/group gates và hard filters: ≥ 8 quý đã công bố, ADV20 ≥ $1M, raw close ≥ $1, đủ 20 phiên giá/volume; chọn một class theo ADV20, ties security_id tăng dần. Eligibility cuối dựa raw coverage ≥ 50% ratios/trục và ≥ 3/4 trục, trước percentile.
-2. Normalize mỗi ratio lõi trên nonmissing observations của eligible universe tại cutoff: (midrank−1)/(n−1), đảo chiều low-is-good, n=1 cho 0,5. n=0 unavailable; mọi ties midrank, không làm tròn trước selection.
-3. Average valid ratios trong trục và valid trục trong composite; xuất số lượng và weights sau reweight. Không thêm change vào level hoặc gia tốc vào Growth chính.
-4. Rank ngành bằng median composite lõi của toàn eligible universe, không chỉ candidate pool. Xuất median trục, IQR, breadth ≥ universe median, coverage, member/candidate counts, thay đổi hạng và score. Ngành không member unavailable; không gán 0.
-5. Chọn top-100 composite lõi gồm toàn bộ ties tại vị trí 100; dưới 100 lấy hết, empty pool có output hợp lệ và reason. Output có thể >100, không cắt ties để tiện code.
-6. Score đặc thù là nhánh tùy chọn theo group version đã qua dictionary gate, không đi vào primary selection/weights. Chưa đạt thì output unavailable. Robustness winsorize 1/99 + z-score là artifact riêng, chưa chạy để chọn primary.
-
-## Interface và artifacts
-
-CLI dự kiến: `uv run frl rank --config configs/research.toml --input-run <features_id>`.
 
 Output: eligibility ledger (pass/fail từng filter và raw counts), ratio/axis/composite scores, industry_ranking, within_group_ranking và candidates Parquet; CSV readable cho mỗi cutoff; summary manifest và diagnostics. Mỗi tỷ lệ phải có mẫu số và scope, cả nhóm bị loại. Zero variance và low member counts là flags hiển thị, không che khỏi báo cáo.
 

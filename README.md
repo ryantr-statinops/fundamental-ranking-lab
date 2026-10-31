@@ -2,7 +2,7 @@
 
 Nghiên cứu định lượng về việc sử dụng dữ liệu tài chính doanh nghiệp để xếp hạng cổ phiếu và ngành tại thị trường Mỹ, xây dựng danh mục cập nhật hàng quý và kiểm chứng hiệu quả ngoài mẫu sau chi phí.
 
-**Trạng thái: Stage 00 & Stage 01 đã đạt cổng nghiệm thu (Passed Gate); Stage 02 đang hoàn thiện tích hợp universe lịch sử.** Repository có foundation code, CLI pilot, offline replay, persistent cache index, workflow Google Colab, bộ Open Dataset trên Hugging Face và pipeline Universe lịch sử (as-of ticker transitions, Ken French 17 industries, split/dividend adjustments, ADV20 liquidity filters).
+**Trạng thái: Stage 00 & Stage 01 đã đạt cổng nghiệm thu (Passed Gate); Stage 02 & Stage 04 đã có baseline thực thi.** Repository có foundation code, CLI pilot, offline replay, persistent cache index, workflow Google Colab, bộ Open Dataset trên Hugging Face, pipeline Universe lịch sử và CLI `frl rank` xếp hạng cổ phiếu/ngành theo 4 trục định lượng (Quality, Growth, Financial Health, Valuation) và thuật toán chọn Top-100 candidates.
 
 ## Mục tiêu nghiên cứu
 
