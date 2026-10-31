@@ -178,3 +178,90 @@ def rank_industries(
         item["rank"] = len(valid_ind) + 1
 
     return valid_ind + invalid_ind
+
+
+def select_top_candidates(
+    eligible_scores: list[dict[str, Any]],
+    cutoff: datetime,
+    top_k: int = 100,
+) -> list[dict[str, Any]]:
+    """Select top K candidate stocks by core composite score including border ties.
+
+    - Sort order: descending composite_score, then ascending security_id.
+    - If total eligible stocks <= top_k: select all.
+    - If stock at index top_k - 1 shares the exact same composite_score with
+      subsequent stocks, include all those ties (is_border_tie = True).
+    """
+    valid_stocks = [
+        s
+        for s in eligible_scores
+        if s.get("eligible", False) and s.get("composite_score") is not None
+    ]
+    if not valid_stocks:
+        return []
+
+    # Sort deterministic: score desc, security_id asc
+    valid_stocks.sort(key=lambda s: (-Decimal(str(s["composite_score"])), str(s["security_id"])))
+
+    n = len(valid_stocks)
+    if n <= top_k:
+        selected = []
+        for rank, s in enumerate(valid_stocks, 1):
+            selected.append(
+                {
+                    "cutoff": cutoff,
+                    "entity_id": s["entity_id"],
+                    "security_id": s["security_id"],
+                    "rank": rank,
+                    "composite_score": s["composite_score"],
+                    "industry": s["industry"],
+                    "group": s["group"],
+                    "is_border_tie": False,
+                    "selection_reason": "under_threshold_all",
+                }
+            )
+        return selected
+
+    threshold_score = Decimal(str(valid_stocks[top_k - 1]["composite_score"]))
+    selected = []
+
+    for rank, s in enumerate(valid_stocks, 1):
+        score = Decimal(str(s["composite_score"]))
+        if rank <= top_k:
+            is_tie = (score == threshold_score) and any(
+                Decimal(str(valid_stocks[j]["composite_score"])) == threshold_score
+                for j in range(top_k, n)
+            )
+            reason = "top100_border_tie" if is_tie else "top100_primary"
+            selected.append(
+                {
+                    "cutoff": cutoff,
+                    "entity_id": s["entity_id"],
+                    "security_id": s["security_id"],
+                    "rank": rank,
+                    "composite_score": s["composite_score"],
+                    "industry": s["industry"],
+                    "group": s["group"],
+                    "is_border_tie": is_tie,
+                    "selection_reason": reason,
+                }
+            )
+        elif score == threshold_score:
+            # Border tie beyond top_k
+            selected.append(
+                {
+                    "cutoff": cutoff,
+                    "entity_id": s["entity_id"],
+                    "security_id": s["security_id"],
+                    "rank": rank,
+                    "composite_score": s["composite_score"],
+                    "industry": s["industry"],
+                    "group": s["group"],
+                    "is_border_tie": True,
+                    "selection_reason": "top100_border_tie",
+                }
+            )
+        else:
+            break
+
+    return selected
