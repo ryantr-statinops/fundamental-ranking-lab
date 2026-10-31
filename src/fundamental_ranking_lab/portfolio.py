@@ -34,3 +34,41 @@ def compute_industry_tilts(
         tilts[ind] = tilt
 
     return tilts
+
+
+def compute_raw_weights(
+    candidates: list[dict[str, Any]],
+    industry_tilts: dict[str, Decimal],
+) -> list[dict[str, Any]]:
+    """Compute raw weights a_i = s_i * T_g and normalized weights sum to 1.0.
+
+    - Candidates are selected top-100 stocks from Stage 04.
+    - If all a_i == 0 or candidates empty: returns weights with target_weight = 0.
+    """
+    if not candidates:
+        return []
+
+    items = []
+    total_raw = Decimal(0)
+    for cand in candidates:
+        score = Decimal(str(cand["composite_score"]))
+        ind = cand["industry"]
+        tilt = industry_tilts.get(ind, Decimal("1.0"))
+        raw_a = score * tilt
+        total_raw += raw_a
+        items.append(
+            {
+                **cand,
+                "raw_score": score,
+                "industry_tilt": tilt,
+                "raw_a": raw_a,
+            }
+        )
+
+    for item in items:
+        if total_raw > 0:
+            item["raw_weight"] = item["raw_a"] / total_raw
+        else:
+            item["raw_weight"] = Decimal(0)
+
+    return items
