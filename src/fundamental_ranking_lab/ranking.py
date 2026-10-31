@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from datetime import datetime
 from decimal import Decimal
 from typing import Any
 
@@ -98,3 +99,82 @@ def compute_axes_and_composite(
         composite = None
 
     return axis_scores, composite, valid_axes_count
+
+
+def _median_and_iqr(values: list[Decimal]) -> tuple[Decimal | None, Decimal | None]:
+    """Compute deterministic median and IQR from sorted Decimal list."""
+    if not values:
+        return None, None
+    s = sorted(values)
+    n = len(s)
+    mid = n // 2
+    median = s[mid] if n % 2 == 1 else (s[mid - 1] + s[mid]) / Decimal(2)
+
+    q1_vals = s[:mid] if n % 2 == 0 else s[:mid]
+    q3_vals = s[mid:] if n % 2 == 0 else s[mid + 1 :]
+
+    def _calc_med(lst: list[Decimal]) -> Decimal:
+        k = len(lst)
+        if k == 0:
+            return Decimal(0)
+        m = k // 2
+        return lst[m] if k % 2 == 1 else (lst[m - 1] + lst[m]) / Decimal(2)
+
+    q1 = _calc_med(q1_vals) if q1_vals else median
+    q3 = _calc_med(q3_vals) if q3_vals else median
+    iqr = q3 - q1
+    return median, iqr
+
+
+def rank_industries(
+    eligible_scores: list[dict[str, Any]],
+    cutoff: datetime,
+    universe_median_composite: Decimal | None = None,
+) -> list[dict[str, Any]]:
+    """Rank industries by median composite score of eligible stocks.
+
+    Ties in median are resolved by fractional midrank.
+    """
+    by_industry: dict[str, list[Decimal]] = defaultdict(list)
+    total_counts: dict[str, int] = defaultdict(int)
+
+    for stock in eligible_scores:
+        ind = stock["industry"]
+        total_counts[ind] += 1
+        comp = stock.get("composite_score")
+        if comp is not None and stock.get("eligible", False):
+            by_industry[ind].append(comp)
+
+    industry_stats = []
+    for ind, total in total_counts.items():
+        scores = by_industry.get(ind, [])
+        median, iqr = _median_and_iqr(scores)
+        breadth: Decimal | None = None
+        if scores and universe_median_composite is not None:
+            above = sum(1 for s in scores if s >= universe_median_composite)
+            breadth = Decimal(above) / Decimal(len(scores))
+
+        industry_stats.append(
+            {
+                "cutoff": cutoff,
+                "industry": ind,
+                "median_composite": median,
+                "iqr_composite": iqr,
+                "eligible_count": len(scores),
+                "total_count": total,
+                "breadth_above_universe_median": breadth,
+            }
+        )
+
+    # Sort by median descending (None at the end), ties by industry name
+    valid_ind = [s for s in industry_stats if s["median_composite"] is not None]
+    valid_ind.sort(key=lambda x: (-Decimal(str(x["median_composite"])), str(x["industry"])))
+
+    for rank, item in enumerate(valid_ind, 1):
+        item["rank"] = rank
+
+    invalid_ind = [s for s in industry_stats if s["median_composite"] is None]
+    for item in invalid_ind:
+        item["rank"] = len(valid_ind) + 1
+
+    return valid_ind + invalid_ind
