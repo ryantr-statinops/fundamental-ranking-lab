@@ -180,3 +180,67 @@ def apply_water_filling_caps(
         )
 
     return results, r
+
+
+def solve_self_financing_execution(
+    v_minus: Decimal,
+    current_holdings: dict[str, Decimal],
+    target_weights: dict[str, Decimal],
+    fee_rate: Decimal = Decimal("0.001"),  # 10 bps one-way
+    tolerance: Decimal = Decimal("1e-10"),
+    max_iter: int = 100,
+) -> tuple[Decimal, Decimal, dict[str, Decimal], Decimal]:
+    """Solve self-financing rebalance equation using bisection:
+
+    V+ = V- - c * sum_i |t_i * V+ - H_i-|
+
+    Returns:
+        (v_plus, total_fee, new_holdings, cash_after)
+    - Guaranteed: v_plus + total_fee == v_minus within tolerance.
+    - All new_holdings and cash_after are >= 0.
+    """
+    if v_minus <= 0:
+        return Decimal(0), Decimal(0), {k: Decimal(0) for k in target_weights}, Decimal(0)
+
+    all_securities = sorted(set(current_holdings.keys()) | set(target_weights.keys()))
+
+    def f(v_p: Decimal) -> tuple[Decimal, Decimal]:
+        notional_traded = sum(
+            abs(target_weights.get(sec, Decimal(0)) * v_p - current_holdings.get(sec, Decimal(0)))
+            for sec in all_securities
+        )
+        fee = fee_rate * notional_traded
+        val = v_p + fee - v_minus
+        return val, fee
+
+    # Bisection search interval [low, high]
+    low = Decimal(0)
+    high = v_minus
+
+    f_low, _ = f(low)
+    f_high, _ = f(high)
+
+    if abs(f_high) <= tolerance:
+        v_plus = high
+        _, fee = f(v_plus)
+    else:
+        for _ in range(max_iter):
+            mid = (low + high) / Decimal(2)
+            f_mid, fee_mid = f(mid)
+            if abs(f_mid) <= tolerance or (high - low) / v_minus <= tolerance:
+                v_plus = mid
+                fee = fee_mid
+                break
+            if f_mid < 0:
+                low = mid
+            else:
+                high = mid
+        else:
+            v_plus = (low + high) / Decimal(2)
+            _, fee = f(v_plus)
+
+    new_holdings = {sec: target_weights.get(sec, Decimal(0)) * v_plus for sec in all_securities}
+    total_stock_value = sum(new_holdings.values(), Decimal(0))
+    cash_after = v_plus - total_stock_value
+
+    return v_plus, fee, new_holdings, cash_after
