@@ -134,3 +134,43 @@ def test_water_filling_scenario_3_five_industries_full_allocation() -> None:
     assert round(cash, 6) == Decimal("0.000000")
     for item in allocated:
         assert round(item["target_weight"], 6) == Decimal("0.010000")
+
+
+def test_solve_self_financing_execution_initial_entry() -> None:
+    # Starting portfolio from all cash (V_minus = 1,000,000, holdings = 0)
+    # Target: 50% in stock A, 50% in stock B
+    # Fee: 10 bps (0.001)
+    # V+ = V- - 0.001 * (0.5*V+ + 0.5*V+) = V- - 0.001 * V+
+    # V+ * 1.001 = 1,000,000 -> V+ = 1,000,000 / 1.001 = 999,000.999...
+    # Fee = 1,000,000 - V+ = 999.000999...
+    from fundamental_ranking_lab.portfolio import solve_self_financing_execution
+
+    v_minus = Decimal("1000000.00")
+    target_weights = {"A": Decimal("0.5"), "B": Decimal("0.5")}
+    current_holdings = {"A": Decimal("0"), "B": Decimal("0")}
+
+    v_plus, fee, new_holdings, cash_after = solve_self_financing_execution(
+        v_minus, current_holdings, target_weights, fee_rate=Decimal("0.001")
+    )
+    # Exact self-financing balance: V+ + fee == V-
+    assert round(v_plus + fee, 4) == v_minus
+    assert round(fee, 2) == Decimal("999.00")
+    assert round(v_plus, 2) == Decimal("999001.00")
+    assert round(cash_after, 4) == Decimal("0.0000")
+    assert round(new_holdings["A"] + new_holdings["B"], 2) == round(v_plus, 2)
+
+
+def test_solve_self_financing_execution_no_trade_zero_fee() -> None:
+    # When target holdings match current holdings exactly -> fee must be 0
+    from fundamental_ranking_lab.portfolio import solve_self_financing_execution
+
+    v_minus = Decimal("1000000.00")
+    target_weights = {"A": Decimal("0.5"), "B": Decimal("0.3")}
+    current_holdings = {"A": Decimal("500000.00"), "B": Decimal("300000.00")}
+
+    v_plus, fee, new_holdings, cash_after = solve_self_financing_execution(
+        v_minus, current_holdings, target_weights, fee_rate=Decimal("0.001")
+    )
+    assert fee == Decimal("0")
+    assert v_plus == v_minus
+    assert cash_after == Decimal("200000.00")
