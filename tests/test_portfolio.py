@@ -59,3 +59,78 @@ def test_compute_raw_weights_with_tilts() -> None:
     assert items[1]["raw_a"] == Decimal("0.4")
     assert items[1]["raw_weight"] == Decimal("0.25")
     assert items[0]["raw_weight"] + items[1]["raw_weight"] == Decimal("1.0")
+
+
+def test_water_filling_scenario_1_four_industries_25_stocks_each() -> None:
+    # Acceptance scenario from spec:
+    # 4 industries, each has 25 stocks with equal raw_a.
+    # Total stocks = 100.
+    # Each industry cap is 20%, so each industry gets 20% NAV.
+    # Total stocks weight = 4 * 20% = 80%.
+    # Remaining residual cash = 20%.
+    from fundamental_ranking_lab.portfolio import apply_water_filling_caps
+
+    items = []
+    for ind in ["Ind1", "Ind2", "Ind3", "Ind4"]:
+        for i in range(25):
+            items.append(
+                {
+                    "entity_id": f"{ind}_{i}",
+                    "security_id": f"{ind}_{i}",
+                    "industry": ind,
+                    "raw_a": Decimal("1.0"),
+                }
+            )
+    allocated, cash = apply_water_filling_caps(items)
+    total_stock_weight = sum(item["target_weight"] for item in allocated)
+    assert round(total_stock_weight, 6) == Decimal("0.800000")
+    assert round(cash, 6) == Decimal("0.200000")
+    # Each stock gets 20% / 25 = 0.8%
+    for item in allocated:
+        assert round(item["target_weight"], 6) == Decimal("0.008000")
+        assert item["cap_binding"] == "sector_20pct"
+
+
+def test_water_filling_scenario_2_three_stocks_different_industries() -> None:
+    # Acceptance scenario from spec:
+    # Only 3 stocks in 3 industries -> each capped at 5% stock cap.
+    # Total stocks weight = 15%.
+    # Residual cash = 85%.
+    from fundamental_ranking_lab.portfolio import apply_water_filling_caps
+
+    items = [
+        {"entity_id": "s1", "security_id": "S1", "industry": "Ind1", "raw_a": Decimal("1.0")},
+        {"entity_id": "s2", "security_id": "S2", "industry": "Ind2", "raw_a": Decimal("1.0")},
+        {"entity_id": "s3", "security_id": "S3", "industry": "Ind3", "raw_a": Decimal("1.0")},
+    ]
+    allocated, cash = apply_water_filling_caps(items)
+    total_stock_weight = sum(item["target_weight"] for item in allocated)
+    assert round(total_stock_weight, 6) == Decimal("0.150000")
+    assert round(cash, 6) == Decimal("0.850000")
+    for item in allocated:
+        assert item["target_weight"] == Decimal("0.05")
+        assert item["cap_binding"] == "stock_5pct"
+
+
+def test_water_filling_scenario_3_five_industries_full_allocation() -> None:
+    # 5 industries, each with 20 stocks with equal raw_a.
+    # 5 * 20% = 100% allocation -> cash = 0%.
+    from fundamental_ranking_lab.portfolio import apply_water_filling_caps
+
+    items = []
+    for ind in ["Ind1", "Ind2", "Ind3", "Ind4", "Ind5"]:
+        for i in range(20):
+            items.append(
+                {
+                    "entity_id": f"{ind}_{i}",
+                    "security_id": f"{ind}_{i}",
+                    "industry": ind,
+                    "raw_a": Decimal("1.0"),
+                }
+            )
+    allocated, cash = apply_water_filling_caps(items)
+    total_stock_weight = sum(item["target_weight"] for item in allocated)
+    assert round(total_stock_weight, 6) == Decimal("1.000000")
+    assert round(cash, 6) == Decimal("0.000000")
+    for item in allocated:
+        assert round(item["target_weight"], 6) == Decimal("0.010000")

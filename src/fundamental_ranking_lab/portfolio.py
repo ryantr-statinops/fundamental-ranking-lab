@@ -154,12 +154,16 @@ def apply_water_filling_caps(
             t[i] += step_delta * d[i]
         r -= step_delta
 
-        if limit_type == "stock":
-            cap_binding[int(limit_target)] = "stock_5pct"
-        elif limit_type == "sector":
-            for j in range(n):
-                if industries[j] == limit_target and t[j] < stock_cap - tolerance:
-                    cap_binding[j] = "sector_20pct"
+        for i in active:
+            if t[i] >= stock_cap - tolerance:
+                cap_binding[i] = "stock_5pct"
+
+        for ind in unique_industries:
+            current_sec_total = sum(t[j] for j in range(n) if industries[j] == ind)
+            if current_sec_total >= sector_cap - tolerance:
+                for j in range(n):
+                    if industries[j] == ind and cap_binding[j] != "stock_5pct":
+                        cap_binding[j] = "sector_20pct"
 
     results = []
     for i, item in enumerate(items):
