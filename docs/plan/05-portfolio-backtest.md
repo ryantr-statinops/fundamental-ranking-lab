@@ -1,18 +1,17 @@
 # Stage 05 — Portfolio construction và backtest
 
-Trạng thái: chưa bắt đầu. Phụ thuộc: dữ liệu audit [stage 02](02-historical-data-universe.md) và ranking [stage 04](04-ranking-baseline.md). Quy tắc gốc: [portfolio/accounting](../idea/05-portfolio-roadmap.md), [events](../idea/04-point-in-time-data.md).
+Trạng thái: **Đã triển khai baseline portfolio construction & water-filling caps engine**. Phụ thuộc: dữ liệu audit [stage 02](02-historical-data-universe.md) và ranking [stage 04](04-ranking-baseline.md). Quy tắc gốc: [portfolio/accounting](../idea/05-portfolio-roadmap.md), [events](../idea/04-point-in-time-data.md).
+
+### Tiến độ implementation:
+- [x] Xây dựng Data Contracts & Parquet Schemas cho Portfolio (`TargetWeight`, `PortfolioHolding`, `RebalanceRecord`).
+- [x] Hiện thực thuật toán tính Industry Percentile và hệ số Tilt $T_g = 1 + \lambda (2p_g - 1)$ với $\lambda = 0.5$.
+- [x] Hiện thực thuật toán Water-Filling áp trần 5% doanh nghiệp, 20% ngành và giữ lại tiền mặt dư thừa (residual cash).
+- [x] Đạt toàn bộ các kịch bản nghiệm thu kiểm thử (4 ngành x 25 mã -> 80% stocks/20% cash; 3 mã -> 15% stocks/85% cash; 5 ngành -> 100% stocks).
+- [x] Hiện thực thuật toán Bisection giải phương trình tự tài trợ chi phí giao dịch $V^+ = V^- - c \sum |t_i V^+ - H_i^-|$ với phí 10 bps.
+- [x] Tích hợp lệnh CLI `uv run frl portfolio --input-ranking <ranking_dir>` xuất `target_weights.parquet`.
+- [x] Smoke run thành công trên ranking output thật của Stage 04.
 
 ## Mục tiêu và đầu vào
-
-Xây engine minh bạch cho target weights, shares/cash, execution, fees và NAV. Đầu vào: pinned candidate/score/industry outputs, raw prices/events/calendar đã audit. Xây và kiểm tra bằng fixtures trước; chạy lịch sử thật theo research/validation, không mở final-test performance trước stage 06 khóa manifest.
-
-## Construction
-
-1. Long-only, không leverage; top-100 gồm ties, không chọn subset 30/50. Industry percentile p=(midrank median ngành tăng−1)/(K−1), K=1 cho 0,5; chỉ tính trên ngành có eligible member.
-2. Raw a_i=s_i×[1+0,5×(2p_g−1)]. Zero a không nhận vốn; empty/all-zero giữ toàn tiền mặt, không tự đổi thành EW.
-3. Water-filling theo a_i với trần doanh nghiệp 5%, ngành 20% NAV sau phí; mỗi bước tăng theo tỷ lệ active đến khi đầy vốn hoặc chạm cap, khóa phần đầy rồi lặp. Tolerance 1e−10; không chuẩn hóa lại stocks lên 100% sau caps.
-4. Cash dư lợi suất 0%, không bổ sung mã ngoài pool. Caps tại rebalance, drift giữa kỳ báo riêng. Thoát mã mất eligibility/rời pool; no-trade band chưa dùng.
-
 ## Engine và accounting
 
 CLI dự kiến: `uv run frl backtest --config configs/research.toml --input-run <ranking_id> --split research` (validation tương tự). Price/event run IDs nằm trong parent manifest; không tự lấy dữ liệu hiện tại.
