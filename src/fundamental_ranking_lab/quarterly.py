@@ -253,7 +253,7 @@ def run_quarterly_reconcile(
         manifest_sha256=manifest_sha,
         message="Simulated execution fills confirmed; actual holdings recorded",
     )
-    phase_data = [phase_rec.model_dump(mode="json")]
+    phase_data = [phase_rec.model_dump(mode="python")]
     write_parquet_atomic(
         pa.Table.from_pylist(phase_data, schema=QUARTERLY_PHASE_SCHEMA),
         out_dir / "quarterly_phase.parquet",
