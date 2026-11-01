@@ -142,3 +142,43 @@ def compute_industry_tercile_spread(
     bot_ret = sum_bot / Decimal(len(bottom_inds))
     spread = top_ret - bot_ret
     return top_ret, bot_ret, spread, len(top_inds), len(bottom_inds)
+
+
+def compute_strategy_vs_baseline(
+    strategy_weights: dict[str, Decimal],
+    stock_returns: dict[str, Decimal],
+    universe_securities: list[str],
+    fee_rate: Decimal = Decimal("0.001"),
+    turnover: Decimal = Decimal("0.20"),
+) -> tuple[Decimal, Decimal, Decimal]:
+    """Compute Q3 Net Strategy Return vs Net Universe Equal-Weight Baseline:
+
+    Returns:
+        (strategy_net, baseline_net, excess_net)
+    - Strategy: weighted sum of returns minus one-way trading fee * turnover.
+    - Baseline: equal-weighted sum of universe returns minus baseline fee.
+    """
+    # Strategy gross return
+    strat_gross = sum(
+        (w * stock_returns.get(sec, Decimal(0)) for sec, w in strategy_weights.items()),
+        Decimal(0),
+    )
+    strat_fee = fee_rate * turnover
+    strat_net = strat_gross - strat_fee
+
+    # Baseline universe equal-weight gross return
+    valid_univ = [sec for sec in universe_securities if sec in stock_returns]
+    if valid_univ:
+        ew_weight = Decimal(1) / Decimal(len(valid_univ))
+        base_gross = sum(
+            (stock_returns[sec] * ew_weight for sec in valid_univ),
+            Decimal(0),
+        )
+    else:
+        base_gross = Decimal(0)
+
+    base_fee = fee_rate * Decimal("0.10")  # Baseline typical turnover
+    base_net = base_gross - base_fee
+
+    excess_net = strat_net - base_net
+    return strat_net, base_net, excess_net
