@@ -114,3 +114,43 @@ def test_compute_industry_tercile_spread_under_three_industries() -> None:
     top_ret, bot_ret, spread, n_top, n_bot = compute_industry_tercile_spread(scores, returns)
     assert spread is None
     assert n_top == 0
+
+
+def test_newey_west_inference_positive_trend() -> None:
+    from fundamental_ranking_lab.evaluation import newey_west_inference
+
+    # 10 quarterly excess returns consistently positive (mean around 0.03)
+    series = [Decimal(f"0.0{i % 3 + 2}") for i in range(10)]
+    mean, hac_se, t_stat, p_val, ci_low, ci_high = newey_west_inference(series)
+    assert mean is not None and mean > 0
+    assert hac_se is not None and hac_se > 0
+    assert t_stat is not None and t_stat > 2.0  # statistically significant
+    assert p_val is not None and p_val < Decimal("0.05")
+    assert ci_low is not None and ci_high is not None
+    assert ci_low < mean < ci_high
+
+
+def test_newey_west_insufficient_samples() -> None:
+    from fundamental_ranking_lab.evaluation import newey_west_inference
+
+    series = [Decimal("0.05"), Decimal("0.02")]
+    mean, hac_se, t_stat, p_val, ci_low, ci_high = newey_west_inference(series)
+    assert mean == Decimal("0.035")
+    assert hac_se is None
+    assert p_val is None
+
+
+def test_benjamini_hochberg_adjust() -> None:
+    from fundamental_ranking_lab.evaluation import benjamini_hochberg_adjust
+
+    # 3 p-values for Q1, Q2, Q3:
+    # raw = [0.01, 0.04, 0.03]
+    # sorted: p(1)=0.01 -> adj = 0.01 * 3 / 1 = 0.03
+    #         p(2)=0.03 -> adj = 0.03 * 3 / 2 = 0.045
+    #         p(3)=0.04 -> adj = 0.04 * 3 / 3 = 0.04
+    # monotonicity backward: p(2) = min(0.045, 0.04) = 0.04
+    raw_p = [Decimal("0.01"), Decimal("0.04"), Decimal("0.03")]
+    adj_p = benjamini_hochberg_adjust(raw_p)
+    assert adj_p[0] == Decimal("0.03")
+    assert adj_p[1] == Decimal("0.04")
+    assert adj_p[2] == Decimal("0.04")
