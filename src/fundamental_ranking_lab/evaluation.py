@@ -182,3 +182,96 @@ def compute_strategy_vs_baseline(
 
     excess_net = strat_net - base_net
     return strat_net, base_net, excess_net
+
+
+def newey_west_inference(
+    series: list[Decimal],
+) -> tuple[
+    Decimal | None,
+    Decimal | None,
+    Decimal | None,
+    Decimal | None,
+    Decimal | None,
+    Decimal | None,
+]:
+    """Compute Newey-West HAC standard error, t-stat, one-sided p-value, and 95% CI.
+
+    Returns:
+        (mean, hac_se, t_stat, one_sided_p_val, ci_lower, ci_upper)
+    - Bartlett kernel lag: floor(4 * (T/100)^(2/9)), bounded by T - 1.
+    - One-sided test H0: mean <= 0 vs H1: mean > 0.
+    """
+    import math
+
+    import numpy as np
+    from scipy import stats  # type: ignore[import-untyped]
+
+    n = len(series)
+    if n < 3:
+        mean_val = (sum(series, Decimal(0)) / Decimal(n)) if n > 0 else None
+        return mean_val, None, None, None, None, None
+
+    y = np.array([float(x) for x in series], dtype=np.float64)
+    mean_flt = float(np.mean(y))
+    demeaned = y - mean_flt
+
+    # Autocovariance gamma_0
+    gamma_0 = float(np.sum(demeaned**2) / n)
+
+    # Bartlett lag
+    max_lag = min(n - 1, max(1, int(math.floor(4.0 * ((n / 100.0) ** (2.0 / 9.0))))))
+
+    omega = gamma_0
+    for lag in range(1, max_lag + 1):
+        weight = 1.0 - (float(lag) / float(max_lag + 1))
+        gamma_l = float(np.sum(demeaned[lag:] * demeaned[:-lag]) / n)
+        omega += 2.0 * weight * gamma_l
+
+    var_mean = max(1e-12, omega / n)
+    hac_se = math.sqrt(var_mean)
+    t_val = mean_flt / hac_se if hac_se > 0 else 0.0
+
+    # One-sided p-value H1: mean > 0
+    dof = n - 1
+    one_sided_p = 1.0 - stats.t.cdf(t_val, df=dof)
+    critical_t = stats.t.ppf(0.975, df=dof)
+
+    ci_low = mean_flt - critical_t * hac_se
+    ci_high = mean_flt + critical_t * hac_se
+
+    return (
+        Decimal(str(round(mean_flt, 6))),
+        Decimal(str(round(hac_se, 6))),
+        Decimal(str(round(t_val, 4))),
+        Decimal(str(round(one_sided_p, 4))),
+        Decimal(str(round(ci_low, 6))),
+        Decimal(str(round(ci_high, 6))),
+    )
+
+
+def benjamini_hochberg_adjust(p_values: list[Decimal | None]) -> list[Decimal | None]:
+    """Adjust a family of p-values using Benjamini-Hochberg FDR control."""
+    valid_pairs = [(i, float(p)) for i, p in enumerate(p_values) if p is not None]
+    m = len(p_values)
+    if not valid_pairs:
+        return [None for _ in p_values]
+
+    # Sort by raw p-value ascending
+    valid_pairs.sort(key=lambda x: x[1])
+    k = len(valid_pairs)
+
+    # BH adjusted: p_(i) * m / i
+    adj_values: list[float] = [0.0] * k
+    for rank_idx, (_, p_val) in enumerate(valid_pairs, 1):
+        adj = min(1.0, p_val * float(m) / float(rank_idx))
+        adj_values[rank_idx - 1] = adj
+
+    # Enforce monotonicity backwards: adj_(i) = min(adj_(i), adj_(i+1))
+    for i in range(k - 2, -1, -1):
+        adj_values[i] = min(adj_values[i], adj_values[i + 1])
+
+    res: list[Decimal | None] = [None] * m
+    for rank_idx, (orig_idx, _) in enumerate(valid_pairs):
+        res[orig_idx] = Decimal(str(round(adj_values[rank_idx], 4)))
+
+    return res
