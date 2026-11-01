@@ -104,3 +104,41 @@ def fama_macbeth_quarterly_ols(
         return slope, t_stat, r_squared, n, k_inds
     except np.linalg.LinAlgError:
         return None, None, None, n, k_inds
+
+
+def compute_industry_tercile_spread(
+    industry_median_scores: dict[str, Decimal],
+    industry_returns: dict[str, Decimal],
+) -> tuple[Decimal | None, Decimal | None, Decimal | None, int, int]:
+    """Compute Q2 top-minus-bottom industry tercile spread:
+
+    Spread = Return_{Top Tercile} - Return_{Bottom Tercile}
+
+    Returns:
+        (top_return, bottom_return, spread, n_top_industries, n_bottom_industries)
+    - Requires at least 3 industries with valid score and return.
+    - Tercile cutpoints: linear 1/3 and 2/3: bottom <= q1, top > q2.
+    """
+    import numpy as np
+
+    common_inds = sorted(set(industry_median_scores.keys()) & set(industry_returns.keys()))
+    k = len(common_inds)
+    if k < 3:
+        return None, None, None, 0, 0
+
+    scores_list = [float(industry_median_scores[ind]) for ind in common_inds]
+    q1 = np.percentile(scores_list, 100.0 / 3.0, method="linear")
+    q2 = np.percentile(scores_list, 200.0 / 3.0, method="linear")
+
+    bottom_inds = [ind for ind in common_inds if float(industry_median_scores[ind]) <= q1]
+    top_inds = [ind for ind in common_inds if float(industry_median_scores[ind]) > q2]
+
+    if not bottom_inds or not top_inds:
+        return None, None, None, len(top_inds), len(bottom_inds)
+
+    sum_top = sum((industry_returns[ind] for ind in top_inds), Decimal(0))
+    top_ret = sum_top / Decimal(len(top_inds))
+    sum_bot = sum((industry_returns[ind] for ind in bottom_inds), Decimal(0))
+    bot_ret = sum_bot / Decimal(len(bottom_inds))
+    spread = top_ret - bot_ret
+    return top_ret, bot_ret, spread, len(top_inds), len(bottom_inds)
