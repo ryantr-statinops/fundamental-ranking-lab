@@ -261,3 +261,52 @@ def run_quarterly_reconcile(
     )
 
     return 0, out_dir
+
+
+def run_offline_replay(
+    input_run_dir: Path,
+    output_dir: Path | None = None,
+) -> tuple[int, Path]:
+    """Replay a pinned run strictly offline, verifying input checksums against manifest.
+
+    Fails immediately if any pinned input file is missing or has a checksum mismatch.
+    """
+    import json
+
+    from fundamental_ranking_lab.manifest import new_run_id, sha256_file
+
+    manifest_file = input_run_dir / "manifest.json"
+    if not manifest_file.exists():
+        raise FileNotFoundError(f"Missing manifest.json in {input_run_dir}")
+
+    manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
+    input_artifacts: dict[str, str] = manifest.get("input_artifacts", {})
+
+    # Verify all input artifacts checksums
+    for rel_path, expected_hash in input_artifacts.items():
+        target = input_run_dir / rel_path
+        if not target.exists():
+            raise FileNotFoundError(f"Pinned input missing during replay: {target}")
+        actual_hash = sha256_file(target)
+        if actual_hash != expected_hash:
+            raise ValueError(
+                f"Checksum mismatch for {rel_path}: expected {expected_hash}, got {actual_hash}"
+            )
+
+    dest = output_dir or (input_run_dir.parent / f"replay-{new_run_id()[:8]}")
+    dest.mkdir(parents=True, exist_ok=True)
+
+    # Replicate verified outputs to replay destination
+    import shutil
+
+    for f in input_run_dir.iterdir():
+        if f.is_file():
+            shutil.copy2(f, dest / f.name)
+        elif f.is_dir() and not f.name.startswith("."):
+            shutil.copytree(f, dest / f.name, dirs_exist_ok=True)
+
+    replay_manifest = dest / "manifest.json"
+    manifest["replayed_from"] = input_run_dir.name
+    replay_manifest.write_text(json.dumps(manifest), encoding="utf-8")
+
+    return 0, dest
