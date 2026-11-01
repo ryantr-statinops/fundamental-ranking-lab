@@ -310,3 +310,59 @@ def run_offline_replay(
     replay_manifest.write_text(json.dumps(manifest), encoding="utf-8")
 
     return 0, dest
+
+
+def backup_run(
+    input_run_dir: Path,
+    backup_destination_dir: Path,
+) -> tuple[int, Path]:
+    """Backup a run to a secondary location and generate checksums.sha256."""
+    import json
+    import shutil
+    from datetime import UTC, datetime
+
+    from fundamental_ranking_lab.manifest import new_run_id, sha256_file
+    from fundamental_ranking_lab.quarterly_contracts import BackupManifest
+
+    if not input_run_dir.exists():
+        raise FileNotFoundError(f"Missing run directory to backup: {input_run_dir}")
+
+    backup_id = f"backup-{new_run_id()[:8]}"
+    target_backup_dir = backup_destination_dir / input_run_dir.name
+    target_backup_dir.mkdir(parents=True, exist_ok=True)
+
+    checksums: dict[str, str] = {}
+    total_bytes = 0
+    file_count = 0
+
+    # Copy all files and compute SHA256 checksums
+    for f in input_run_dir.rglob("*"):
+        if f.is_file() and not f.name.startswith("."):
+            rel = f.relative_to(input_run_dir)
+            dest_file = target_backup_dir / rel
+            dest_file.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(f, dest_file)
+
+            digest = sha256_file(dest_file)
+            checksums[rel.as_posix()] = digest
+            total_bytes += dest_file.stat().st_size
+            file_count += 1
+
+    # Write standard checksums.sha256 text file
+    lines = [f"{hash_val}  {fname}" for fname, hash_val in sorted(checksums.items())]
+    (target_backup_dir / "checksums.sha256").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    # Write BackupManifest
+    manifest = BackupManifest(
+        backup_id=backup_id,
+        run_id=input_run_dir.name,
+        backed_up_at=datetime.now(UTC),
+        file_count=file_count,
+        total_bytes=total_bytes,
+        checksums=checksums,
+    )
+    (target_backup_dir / "backup_manifest.json").write_text(
+        json.dumps(manifest.model_dump(mode="json"), indent=2), encoding="utf-8"
+    )
+
+    return 0, target_backup_dir
