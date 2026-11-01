@@ -13,7 +13,7 @@ Ngày lập: 2026-10-15; cập nhật: 2026-10-29. Bộ tài liệu này chuyể
 | 04 | [Ranking baseline](04-ranking-baseline.md) | 03 | **Hoàn thành baseline** (`frl rank`: Percentile, 4 trục, Top-100) |
 | 05 | [Portfolio và backtest](05-portfolio-backtest.md) | 02–04: dữ liệu đạt cổng | **Hoàn thành baseline** (`frl portfolio`: Water-filling caps 5%/20%) |
 | 06 | [Validation và báo cáo](06-validation-reporting.md) | 05, cấu hình đã khóa trước test | **Hoàn thành baseline** (`frl evaluate`: Q1-Q3 Newey-West & BH) |
-| 07 | [Vận hành hàng quý](07-quarterly-operation.md) | 00–06 và kết luận vận hành | Kế hoạch tiếp theo (Quarterly runbook & backup) |
+| 07 | [Vận hành hàng quý](07-quarterly-operation.md) | 00–06 và kết luận vận hành | **Hoàn thành baseline** (Quarterly runbook, writer lock & offline replay) |
 Đi tuần tự; stage 01 được xây lát cắt nhỏ ingestion/features để pilot, stage 02/03 mở rộng và củng cố lại cùng code, không tạo pipeline thứ hai. Fixtures tổng hợp có thể xây trước khi dữ liệu thật đạt cổng; không dùng chúng làm bằng chứng performance.
 
 ## Bàn giao tài liệu theo stage

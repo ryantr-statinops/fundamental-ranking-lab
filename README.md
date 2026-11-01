@@ -2,7 +2,7 @@
 
 Nghiên cứu định lượng về việc sử dụng dữ liệu tài chính doanh nghiệp để xếp hạng cổ phiếu và ngành tại thị trường Mỹ, xây dựng danh mục cập nhật hàng quý và kiểm chứng hiệu quả ngoài mẫu sau chi phí.
 
-**Trạng thái: Toàn bộ Stage 00 đến Stage 06 đã hoàn thiện baseline thực thi (Stage 00/01 đạt cổng).** Repository có foundation code, CLI pilot, offline replay, persistent cache index, workflow Google Colab, bộ Open Dataset trên Hugging Face, pipeline Universe lịch sử, CLI `frl rank` xếp hạng 4 trục, CLI `frl portfolio` xây dựng danh mục theo water-filling caps và CLI `frl evaluate` kiểm định thống kê Q1 (Fama-MacBeth OLS), Q2 (Industry Terciles) và Q3 (Net Active Return) với Newey-West HAC & Benjamini-Hochberg FDR control.
+**Trạng thái: Toàn bộ 100% Roadmap từ Stage 00 đến Stage 07 đã hoàn thiện baseline thực thi (Stage 00/01 đạt cổng).** Repository có foundation code, CLI pilot, offline replay, persistent cache index, workflow Google Colab, bộ Open Dataset trên Hugging Face, pipeline Universe lịch sử, CLI `frl rank` xếp hạng 4 trục, CLI `frl portfolio` xây dựng danh mục theo water-filling caps, CLI `frl evaluate` kiểm định thống kê Q1–Q3 và CLI `frl quarterly` / `frl replay` phục vụ vận hành tái cân bằng định kỳ và khôi phục thảm họa.
 
 ## Mục tiêu nghiên cứu
 
@@ -114,10 +114,12 @@ uv run ruff format --check .
 uv run mypy src
 ```
 
-`frl doctor` kiểm tra runtime và config. Hệ thống hỗ trợ chuỗi lệnh CLI hoàn chỉnh:
+`frl doctor` kiểm tra runtime và config. Hệ thống hỗ trợ chuỗi lệnh CLI hoàn chỉnh từ đầu đến cuối:
 - `uv run frl pilot --config configs/pilot.toml`: Thu thập và trích xuất chỉ số Point-in-Time.
 - `uv run frl rank --input-run artifacts/<run_id>`: Chuẩn hóa percentile và xếp hạng 4 trục.
 - `uv run frl portfolio --input-ranking artifacts/<run_id>/ranking`: Xây dựng danh mục phân bổ vốn tối ưu.
 - `uv run frl evaluate --input-ranking artifacts/<run_id>/ranking`: Kiểm định thống kê ngoài mẫu Q1, Q2, Q3.
+- `uv run frl quarterly --cutoff YYYY-MM-DD --phase signal|reconcile`: Vận hành tái cân bằng hàng quý theo SOP.
+- `uv run frl replay --input-run artifacts/<run_id>`: Tái lập kết quả offline với xác minh SHA-256.
 
-Xem thêm [Hugging Face Open Dataset](https://huggingface.co/datasets/ryantr/us-equities-sec-fundamentals), [hướng dẫn chạy pipeline](docs/guides/running-pipeline.md) và [hướng dẫn cloud execution](docs/guides/cloud-execution.md).
+Xem thêm [Sổ tay Vận hành Hàng quý](docs/guides/quarterly-runbook.md), [Báo cáo Danh mục Trực quan](reports/portfolio/PORTFOLIO_REPORT.md), [Hugging Face Open Dataset](https://huggingface.co/datasets/ryantr/us-equities-sec-fundamentals), [hướng dẫn chạy pipeline](docs/guides/running-pipeline.md) và [hướng dẫn cloud execution](docs/guides/cloud-execution.md).

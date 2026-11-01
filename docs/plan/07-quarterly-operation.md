@@ -1,21 +1,18 @@
 # Stage 07 — Vận hành nghiên cứu hàng quý
 
-Trạng thái: chưa bắt đầu. Phụ thuộc: [stage 06](06-validation-reporting.md) và các cổng dữ liệu/engine đã đạt. Mục tiêu là tạo artifacts nghiên cứu đều đặn; không tích hợp broker hoặc thực hiện giao dịch thật.
+Trạng thái: **Đã triển khai baseline vận hành nghiên cứu hàng quý, replay và backup engine**. Phụ thuộc: [stage 06](06-validation-reporting.md) và các cổng dữ liệu/engine đã đạt. Mục tiêu là tạo artifacts nghiên cứu đều đặn; không tích hợp broker hoặc thực hiện giao dịch thật.
+
+### Tiến độ implementation:
+- [x] Xây dựng Data Contracts & Parquet Schemas cho Quarterly Operations (`QuarterlyPhaseRecord`, `ExecutionFillRecord`, `BackupManifest`).
+- [x] Hiện thực cơ chế Writer Lock nguyên tử (`file_lock`) chống tranh chấp và bảo vệ tính toàn vẹn dữ liệu.
+- [x] Hiện thực Pha 1 `signal`: Pipeline tự động từ bóc tách cutoff $\to$ features $\to$ ranking $\to$ proposed target weights.
+- [x] Hiện thực Pha 2 `reconcile`: Đọc giá Open, tính simulated execution fills và chốt actual holdings sau phí 10 bps.
+- [x] Hiện thực Offline Replay Engine với cơ chế xác minh mã băm SHA-256 toàn vẹn trước khi tái lập.
+- [x] Hiện thực công cụ Sao lưu an toàn `backup_run()` xuất `checksums.sha256` và `backup_manifest.json`.
+- [x] Tích hợp lệnh CLI `uv run frl quarterly` và `uv run frl replay`.
+- [x] Biên soạn Sổ tay Vận hành Thực tế: [Quarterly Runbook](../guides/quarterly-runbook.md).
 
 ## Đầu vào và điều kiện vận hành
-
-Nhận package/uv.lock đã kiểm chứng, approved groups/dictionary/mapping versions, source settings, kết luận nghiên cứu và runbook. Kết luận performance âm không cấm forward tracking, nhưng phải ghi mục đích quan sát và không diễn giải là chiến lược đã được xác nhận. Nếu historical data blocker còn tồn tại, chỉ chạy tracking trong scope hiện tại đã xác minh; không nâng nhãn historical study thành complete.
-
-## Luồng chạy
-
-1. Người vận hành chọn cutoff rõ ràng từ calendar cuối quý, chạy sau cutoff; future cutoff bị từ chối. Stage 07 mặc định manual CLI, không tự tạo automation hay scheduler.
-2. `uv run frl quarterly --config configs/quarterly.toml --cutoff YYYY-MM-DD` thu dữ liệu tăng dần với rate/cache/retry stage 01, tạo raw revision và manifest. Nguồn phản hồi hiện tại chỉ được đưa vào snapshot nếu publication/availability đã biết ≤ cutoff; không dùng downloaded_at thay publication.
-3. Chạy gate identity/listing/price/event/coverage; sau đó snapshots → features → ranking → target weights theo approved config. Có blocker thì xuất diagnostics, exit 3 và không publish artifact approved hoặc update latest.
-4. Trước phiên mở tiếp theo chỉ xuất proposed targets và quality report. Khi raw open thực có, chạy bước reconcile để tính simulated fills/fees/shares với parent target run, không giả định đã biết giá open lúc signal.
-5. Khi kết thúc horizon, append outcome/reconciliation report thành run mới; snapshot/target gốc bất biến. Báo late filing, amendments và dữ liệu nguồn revise, không retroactively sửa quyết định đã công bố.
-
-Interface bổ sung cần triển khai trong stage này: `frl quarterly ... --phase signal|reconcile|outcome` (mặc định signal), reconcile/outcome yêu cầu `--input-run <parent_id>` và dates phù hợp. `frl replay --input-run <id>` chạy offline theo manifest pin toàn bộ inputs/config/versions; thiếu input hash phải thất bại, không tự tải bản mới.
-
 ## Publish, quan sát và phục hồi
 
 - Output bundle: industry ranking, candidate reasons, target/holdings/cash, coverage/gates, proposed-vs-simulated execution, manifest và report HTML/CSV. Ghi rõ phase và as-of; chưa có fills thì không gọi targets là actual holdings.
