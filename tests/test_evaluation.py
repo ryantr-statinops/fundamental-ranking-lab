@@ -70,3 +70,47 @@ def test_fama_macbeth_insufficient_observations() -> None:
     slope, t_stat, r_sq, n, k = fama_macbeth_quarterly_ols(scores, returns, industries)
     assert slope is None
     assert t_stat is None
+
+
+def test_compute_industry_tercile_spread() -> None:
+    from fundamental_ranking_lab.evaluation import compute_industry_tercile_spread
+
+    # 6 industries with scores 0.1, 0.2, 0.3, 0.4, 0.5, 0.6
+    # Returns: Top industries gain 10%, bottom lose -5%
+    scores = {
+        "Ind1": Decimal("0.10"),
+        "Ind2": Decimal("0.20"),
+        "Ind3": Decimal("0.30"),
+        "Ind4": Decimal("0.40"),
+        "Ind5": Decimal("0.50"),
+        "Ind6": Decimal("0.60"),
+    }
+    returns = {
+        "Ind1": Decimal("-0.05"),
+        "Ind2": Decimal("-0.03"),
+        "Ind3": Decimal("0.00"),
+        "Ind4": Decimal("0.02"),
+        "Ind5": Decimal("0.08"),
+        "Ind6": Decimal("0.12"),
+    }
+    top_ret, bot_ret, spread, n_top, n_bot = compute_industry_tercile_spread(scores, returns)
+    assert top_ret is not None and bot_ret is not None and spread is not None
+    assert n_top == 2
+    assert n_bot == 2
+    # Top tercile: Ind5 (0.08) and Ind6 (0.12) -> avg = 0.10
+    assert round(top_ret, 2) == Decimal("0.10")
+    # Bottom tercile: Ind1 (-0.05) and Ind2 (-0.03) -> avg = -0.04
+    assert round(bot_ret, 2) == Decimal("-0.04")
+    # Spread = 0.10 - (-0.04) = 0.14
+    assert round(spread, 2) == Decimal("0.14")
+
+
+def test_compute_industry_tercile_spread_under_three_industries() -> None:
+    from fundamental_ranking_lab.evaluation import compute_industry_tercile_spread
+
+    # Only 2 industries -> must return None
+    scores = {"Ind1": Decimal("0.10"), "Ind2": Decimal("0.50")}
+    returns = {"Ind1": Decimal("0.02"), "Ind2": Decimal("0.08")}
+    top_ret, bot_ret, spread, n_top, n_bot = compute_industry_tercile_spread(scores, returns)
+    assert spread is None
+    assert n_top == 0
