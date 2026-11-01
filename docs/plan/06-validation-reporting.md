@@ -1,19 +1,18 @@
 # Stage 06 — Validation, inference và báo cáo
 
-Trạng thái: chưa bắt đầu. Phụ thuộc: [stage 05](05-portfolio-backtest.md), dữ liệu/feature/ranking gates đã đạt. Quy tắc gốc: [hypothesis validation](../idea/03-hypothesis-validation.md).
+Trạng thái: **Đã triển khai baseline validation & statistical inference engine**. Phụ thuộc: [stage 05](05-portfolio-backtest.md), dữ liệu/feature/ranking gates đã đạt. Quy tắc gốc: [hypothesis validation](../idea/03-hypothesis-validation.md).
+
+### Tiến độ implementation:
+- [x] Xây dựng Data Contracts & Parquet Schemas cho Evaluation (`FamaMacBethRecord`, `TercileSpreadRecord`, `ExcessReturnRecord`, `HypothesisSummary`).
+- [x] Hiện thực hàm tính Forward Gross Returns open-to-open giữa các mốc cutoff.
+- [x] Hiện thực kiểm định Q1: Cross-Sectional OLS Fama–MacBeth kiểm soát biến giả ngành.
+- [x] Hiện thực kiểm định Q2: Industry Top-Minus-Bottom Tercile Spread (cutpoints linear 1/3 và 2/3).
+- [x] Hiện thực kiểm định Q3: Net Strategy Return vs Net Universe Equal-Weight Baseline sau chi phí 10 bps.
+- [x] Hiện thực suy luận thống kê Newey–West HAC (Bartlett kernel tự động chọn lag) và hiệu chỉnh đa giả thuyết Benjamini–Hochberg FDR control ($\alpha=0.05$).
+- [x] Tích hợp lệnh CLI `uv run frl evaluate --input-ranking <path>` xuất các bảng Parquet kiểm định `fama_macbeth.parquet`, `industry_terciles.parquet`, `excess_returns.parquet`, `hypothesis_summary.parquet`.
+- [x] Smoke check thành công trên run thật của Stage 01.
 
 ## Mục tiêu và đầu vào
-
-Trả lời Q1–Q3 bằng đánh giá ngoài mẫu có thể tái lập, tách primary khỏi exploratory. Đầu vào: audited scope, feature/ranking versions, engine tests, research/validation runs và primary config. Chưa được gọi performance test là unseen nếu đã xem hoặc dùng chọn cấu hình.
-
-## Trình tự nghiên cứu
-
-1. Sample mục tiêu tín hiệu 2010Q1–2025Q4, outcome tới open Q2/2026; research 2010–2019, validation 2020–2022, test 2023–2025. Purge 2019Q4/2022Q4 do outcome vượt split; áp tương tự nếu scope audit thay đổi. Primary test tối đa 12 quý.
-2. Dùng research/validation kiểm tra đúng đắn và độ bền. Mọi thay đổi factor/tag/eligibility/weights phải có lý do, version, cập nhật idea và rerun affected stages; không tuning bằng test.
-3. Freeze study manifest trước mở test: data/scope/group/schema/config/factor hashes, git/lock, dates/purge, cost, caps/λ, primary tests, secondary registry, missing handling và random seed. CLI mặc định từ chối split test nếu không có manifest.
-4. Chạy stage 05 với `--split test --study-manifest <file>`; mọi lần xem/rerun ghi audit. Rerun cùng inputs chỉ tái lập; thay cấu hình sau xem test chuyển nghiên cứu mới thành exploratory và cần sample mới để xác nhận.
-5. Đánh giá và xuất cả kết quả âm/unavailable. Gate unresolved data chặn primary performance, không chỉ gắn disclaimer vào biểu đồ vẫn mang nhãn xác nhận.
-
 ## Kiểm định và baselines
 
 Primary: Q1 quarterly OLS forward gross return ~ score + intercept + industry dummies (drop một dummy), mean slopes; Q2 gross top-minus-bottom tercile ngành, EW member rồi EW ngành; Q3 net strategy trừ net universe EW. Q1 singular/no residual degrees of freedom hoặc Q2 <3 ngành/empty bucket là unavailable.

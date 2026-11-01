@@ -2,7 +2,7 @@
 
 Nghiên cứu định lượng về việc sử dụng dữ liệu tài chính doanh nghiệp để xếp hạng cổ phiếu và ngành tại thị trường Mỹ, xây dựng danh mục cập nhật hàng quý và kiểm chứng hiệu quả ngoài mẫu sau chi phí.
 
-**Trạng thái: Stage 00 & Stage 01 đã đạt cổng nghiệm thu (Passed Gate); Stage 02, Stage 04 & Stage 05 đã có baseline hoàn thiện.** Repository có foundation code, CLI pilot, offline replay, persistent cache index, workflow Google Colab, bộ Open Dataset trên Hugging Face, pipeline Universe lịch sử, CLI `frl rank` xếp hạng 4 trục và CLI `frl portfolio` xây dựng danh mục theo thuật toán nghiêng ngành $\lambda=0.5$ và water-filling caps (trần doanh nghiệp 5%, ngành 20%).
+**Trạng thái: Toàn bộ Stage 00 đến Stage 06 đã hoàn thiện baseline thực thi (Stage 00/01 đạt cổng).** Repository có foundation code, CLI pilot, offline replay, persistent cache index, workflow Google Colab, bộ Open Dataset trên Hugging Face, pipeline Universe lịch sử, CLI `frl rank` xếp hạng 4 trục, CLI `frl portfolio` xây dựng danh mục theo water-filling caps và CLI `frl evaluate` kiểm định thống kê Q1 (Fama-MacBeth OLS), Q2 (Industry Terciles) và Q3 (Net Active Return) với Newey-West HAC & Benjamini-Hochberg FDR control.
 
 ## Mục tiêu nghiên cứu
 
@@ -114,8 +114,10 @@ uv run ruff format --check .
 uv run mypy src
 ```
 
-`frl doctor` chỉ đọc runtime và config. Lệnh pilot đã có nhưng lần chạy live hiện chưa thể gọi SEC cho tới khi bạn thiết lập contact local; cách làm và replay ghi ở [hướng dẫn chạy pipeline](docs/guides/running-pipeline.md). Ranking, portfolio và backtest chưa khả dụng. Xem thêm [hướng dẫn setup](docs/guides/setup.md), [configuration](docs/guides/configuration.md), [technical architecture](docs/technical/architecture.md) và [pilot findings](docs/research/pilot-findings.md).
+`frl doctor` kiểm tra runtime và config. Hệ thống hỗ trợ chuỗi lệnh CLI hoàn chỉnh:
+- `uv run frl pilot --config configs/pilot.toml`: Thu thập và trích xuất chỉ số Point-in-Time.
+- `uv run frl rank --input-run artifacts/<run_id>`: Chuẩn hóa percentile và xếp hạng 4 trục.
+- `uv run frl portfolio --input-ranking artifacts/<run_id>/ranking`: Xây dựng danh mục phân bổ vốn tối ưu.
+- `uv run frl evaluate --input-ranking artifacts/<run_id>/ranking`: Kiểm định thống kê ngoài mẫu Q1, Q2, Q3.
 
-Khi thay đổi thiết kế, cập nhật tài liệu nguồn trong `docs/idea`, sổ quyết định và bảng tham số; README này giữ vai trò tổng quan.
-
-Stage 02 có `frl ingest` và `frl audit-universe` cho fixtures/replay, chưa đạt cổng dữ liệu thật. Xem [hướng dẫn historical universe](docs/guides/historical-universe.md) để chạy mà không cần SEC contact; fixtures không mở quyền kết luận performance.
+Xem thêm [Hugging Face Open Dataset](https://huggingface.co/datasets/ryantr/us-equities-sec-fundamentals), [hướng dẫn chạy pipeline](docs/guides/running-pipeline.md) và [hướng dẫn cloud execution](docs/guides/cloud-execution.md).
