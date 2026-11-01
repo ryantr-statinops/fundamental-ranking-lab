@@ -2,7 +2,7 @@
 
 Nghiên cứu định lượng về việc sử dụng dữ liệu tài chính doanh nghiệp để xếp hạng cổ phiếu và ngành tại thị trường Mỹ, xây dựng danh mục cập nhật hàng quý và kiểm chứng hiệu quả ngoài mẫu sau chi phí.
 
-**Trạng thái: Toàn bộ 100% Roadmap từ Stage 00 đến Stage 07 đã hoàn thiện baseline thực thi (Stage 00/01 đạt cổng).** Repository có foundation code, CLI pilot, offline replay, persistent cache index, workflow Google Colab, bộ Open Dataset trên Hugging Face, pipeline Universe lịch sử, CLI `frl rank` xếp hạng 4 trục, CLI `frl portfolio` xây dựng danh mục theo water-filling caps, CLI `frl evaluate` kiểm định thống kê Q1–Q3 và CLI `frl quarterly` / `frl replay` phục vụ vận hành tái cân bằng định kỳ và khôi phục thảm họa.
+**Trạng thái: Toàn bộ 100% Roadmap từ Stage 00 đến Stage 07 đã hoàn thiện baseline thực thi (Stage 00/01 đạt cổng).** Repository có foundation code, CLI pilot, offline replay, persistent cache index, workflow Google Colab, bộ Open Dataset trên Hugging Face, pipeline Universe lịch sử, CLI `frl rank` xếp hạng 4 trục, CLI `frl portfolio` xây dựng danh mục theo water-filling caps, CLI `frl evaluate` kiểm định thống kê Q1–Q3 và CLI `frl quarterly` / `frl replay` phục vụ vận hành tái cân bằng định kỳ và khôi phục thảm họa. Đã có công cụ trực quan hóa và báo cáo danh mục tại [`reports/portfolio/PORTFOLIO_REPORT.md`](reports/portfolio/PORTFOLIO_REPORT.md).
 
 ## Mục tiêu nghiên cứu
 
@@ -52,8 +52,9 @@ Cutoff là 16:00 `America/New_York` vào ngày giao dịch cuối quý; giao d�
 | Danh sách cổ phiếu | Candidate pool, scores, thứ hạng, lý do chọn/loại và cờ dữ liệu |
 | Danh mục | Holdings, tỷ trọng trước/sau giới hạn, tiền mặt và chi phí |
 | Báo cáo nghiên cứu | Ranking metrics, lợi nhuận gross/net, rủi ro, turnover, concentration, kiểm định và giới hạn kết luận |
+| Báo cáo trực quan | Visual Portfolio Report (biểu đồ phân bổ tròn, bar chart điểm số composite và bảng hạch toán caps) |
 
-Các đầu ra này là mục tiêu triển khai, chưa phải artifacts đã có trong repository.
+Các đầu ra này hiện đã có baseline thực thi và artifact minh chứng trong repository.
 
 ## Dữ liệu và nguyên tắc kiểm chứng
 
@@ -113,6 +114,11 @@ uv run ruff check .
 uv run ruff format --check .
 uv run mypy src
 ```
+`frl doctor` kiểm tra runtime và config. Hệ thống đã hỗ trợ đầy đủ chuỗi lệnh CLI:
+- `uv run frl pilot --config configs/pilot.toml`: Thu thập và trích xuất chỉ số Point-in-Time.
+- `uv run frl rank --input-run artifacts/<run_id>`: Chuẩn hóa percentile và xếp hạng 4 trục.
+- `uv run frl portfolio --input-ranking artifacts/<run_id>/ranking`: Xây dựng danh mục phân bổ vốn tối ưu.
+- `uv run python scripts/generate_report.py --ranking-dir artifacts/<run_id>/ranking`: Tự động vẽ biểu đồ và xuất báo cáo danh mục trực quan.
 
 `frl doctor` kiểm tra runtime và config. Hệ thống hỗ trợ chuỗi lệnh CLI hoàn chỉnh từ đầu đến cuối:
 - `uv run frl pilot --config configs/pilot.toml`: Thu thập và trích xuất chỉ số Point-in-Time.
