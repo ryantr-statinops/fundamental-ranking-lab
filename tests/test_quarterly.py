@@ -92,3 +92,44 @@ def test_run_quarterly_reconcile_generates_holdings(tmp_path: Path) -> None:
     assert (rec_dir / "execution_fills.parquet").exists()
     assert (rec_dir / "rebalance_record.parquet").exists()
     assert (rec_dir / "quarterly_phase.parquet").exists()
+
+
+def test_backup_and_replay_cycle(tmp_path: Path) -> None:
+    import json
+
+    from fundamental_ranking_lab.manifest import sha256_file
+    from fundamental_ranking_lab.quarterly import backup_run, run_offline_replay
+
+    src_run = tmp_path / "source_run"
+    src_run.mkdir(parents=True)
+
+    # Create mock artifacts
+    data_file = src_run / "data.csv"
+    data_file.write_text("a,b,c\n1,2,3\n", encoding="utf-8")
+    data_sha = sha256_file(data_file)
+
+    manifest = {
+        "run_id": "source_run",
+        "input_artifacts": {"data.csv": data_sha},
+    }
+    (src_run / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+
+    # 1. Test Backup
+    backup_dir = tmp_path / "backups"
+    code, target_backup = backup_run(src_run, backup_dir)
+    assert code == 0
+    assert (target_backup / "checksums.sha256").exists()
+    assert (target_backup / "backup_manifest.json").exists()
+    assert (target_backup / "data.csv").exists()
+
+    # 2. Test Replay from backup
+    code, replayed = run_offline_replay(target_backup, tmp_path / "replayed_run")
+    assert code == 0
+    assert (replayed / "data.csv").exists()
+    replayed_manifest = json.loads((replayed / "manifest.json").read_text(encoding="utf-8"))
+    assert replayed_manifest["replayed_from"] == "source_run"
+
+    # 3. Test Replay fails if an input is tampered with
+    (target_backup / "data.csv").write_text("corrupted content", encoding="utf-8")
+    with pytest.raises(ValueError, match="Checksum mismatch"):
+        run_offline_replay(target_backup, tmp_path / "replayed_fail")
