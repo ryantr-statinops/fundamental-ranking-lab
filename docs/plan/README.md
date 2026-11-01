@@ -1,20 +1,19 @@
 # Kế hoạch thực thi Fundamental Ranking Lab
 
-Ngày lập: 2026-10-15; cập nhật: 2026-10-16. Bộ tài liệu này chuyển [research specification](../idea/README.md) thành các stage thực thi. Stage 00 đã đạt cổng nền tảng. Stage 01 đã có implementation và chạy offline; feasibility pilot vẫn bị chặn vì chưa cấu hình contact SEC và chưa có dữ liệu/đối chiếu thực. Backtest chưa triển khai.
+Ngày lập: 2026-10-15; cập nhật: 2026-10-29. Bộ tài liệu này chuyển [research specification](../idea/README.md) thành các stage thực thi. Stage 00 & 01 đã đạt cổng nghiệm thu dữ liệu thật; Stage 02, 03, 04, 05 và 06 đã hoàn thành baseline thực thi và chuỗi lệnh CLI tự động.
 
 ## Thứ tự và phụ thuộc
 
 | Stage | Kế hoạch | Phụ thuộc | Trạng thái |
 |---|---|---|---|
-| 00 | [Nền tảng kỹ thuật](00-technical-foundation.md) | Bộ idea hiện tại | Đạt cổng nền tảng |
-| 01 | [Pilot khả thi dữ liệu](01-data-feasibility-pilot.md) | 00 | Đang triển khai; pilot thật bị chặn |
-| 02 | [Dữ liệu lịch sử và universe](02-historical-data-universe.md) | 01: nhóm/nguồn đạt cổng | Có implementation offline; dữ liệu thật chưa đạt cổng |
-| 03 | [Point-in-time và features](03-point-in-time-features.md) | 02: manifest phạm vi đã khóa | Chưa bắt đầu |
-| 04 | [Ranking baseline](04-ranking-baseline.md) | 03 | Chưa bắt đầu |
-| 05 | [Portfolio và backtest](05-portfolio-backtest.md) | 02–04: dữ liệu đạt cổng | Chưa bắt đầu |
-| 06 | [Validation và báo cáo](06-validation-reporting.md) | 05, cấu hình đã khóa trước test | Chưa bắt đầu |
-| 07 | [Vận hành hàng quý](07-quarterly-operation.md) | 00–06 và kết luận vận hành | Chưa bắt đầu |
-
+| 00 | [Nền tảng kỹ thuật](00-technical-foundation.md) | Bộ idea hiện tại | **Đạt cổng nền tảng** |
+| 01 | [Pilot khả thi dữ liệu](01-data-feasibility-pilot.md) | 00 | **Đạt cổng khả thi dữ liệu thật** (Reconciliation 0.00, 40 CIKs) |
+| 02 | [Dữ liệu lịch sử và universe](02-historical-data-universe.md) | 01: nhóm/nguồn đạt cổng | **Hoàn thành baseline** (Approved groups, as-of universe, ADV20) |
+| 03 | [Point-in-time và features](03-point-in-time-features.md) | 02: manifest phạm vi đã khóa | **Hoàn thành baseline** (TTM, YoY Growth, 8 Ratios lõi) |
+| 04 | [Ranking baseline](04-ranking-baseline.md) | 03 | **Hoàn thành baseline** (`frl rank`: Percentile, 4 trục, Top-100) |
+| 05 | [Portfolio và backtest](05-portfolio-backtest.md) | 02–04: dữ liệu đạt cổng | **Hoàn thành baseline** (`frl portfolio`: Water-filling caps 5%/20%) |
+| 06 | [Validation và báo cáo](06-validation-reporting.md) | 05, cấu hình đã khóa trước test | **Hoàn thành baseline** (`frl evaluate`: Q1-Q3 Newey-West & BH) |
+| 07 | [Vận hành hàng quý](07-quarterly-operation.md) | 00–06 và kết luận vận hành | Kế hoạch tiếp theo (Quarterly runbook & backup) |
 Đi tuần tự; stage 01 được xây lát cắt nhỏ ingestion/features để pilot, stage 02/03 mở rộng và củng cố lại cùng code, không tạo pipeline thứ hai. Fixtures tổng hợp có thể xây trước khi dữ liệu thật đạt cổng; không dùng chúng làm bằng chứng performance.
 
 ## Bàn giao tài liệu theo stage
