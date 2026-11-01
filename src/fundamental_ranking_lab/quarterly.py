@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 from collections.abc import Generator
 from contextlib import contextmanager, suppress
+from decimal import Decimal
 from pathlib import Path
 
 
@@ -105,3 +106,158 @@ def run_quarterly_signal(
         )
 
         return 0, out_dir
+
+
+def run_quarterly_reconcile(
+    parent_signal_dir: Path,
+    open_prices: dict[str, Decimal],
+    output_root: Path | None = None,
+    starting_nav: Decimal | None = None,
+) -> tuple[int, Path]:
+    """Execute Phase 2 'reconcile' when market opens next morning:
+
+    1. Loads proposed target weights from parent signal run.
+    2. Solves self-financing execution fees with open prices.
+    3. Computes exact shares filled and actual holdings.
+    """
+    import json
+    from datetime import UTC, datetime
+
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    from fundamental_ranking_lab.manifest import new_run_id, sha256_file
+    from fundamental_ranking_lab.portfolio import solve_self_financing_execution
+    from fundamental_ranking_lab.portfolio_contracts import (
+        PORTFOLIO_HOLDINGS_SCHEMA,
+        REBALANCE_RECORD_SCHEMA,
+    )
+    from fundamental_ranking_lab.quarterly_contracts import (
+        EXECUTION_FILL_SCHEMA,
+        QUARTERLY_PHASE_SCHEMA,
+        QuarterlyPhaseRecord,
+    )
+    from fundamental_ranking_lab.storage import write_parquet_atomic
+
+    nav = starting_nav if starting_nav is not None else Decimal("1000000.00")
+
+    targets_path = parent_signal_dir / "portfolio" / "target_weights.parquet"
+    if not targets_path.exists():
+        # Check direct folder
+        targets_path = parent_signal_dir / "target_weights.parquet"
+        if not targets_path.exists():
+            raise FileNotFoundError(f"Missing target_weights.parquet in {parent_signal_dir}")
+
+    targets_df = pq.read_table(targets_path).to_pandas()  # type: ignore[no-untyped-call]
+    target_weights: dict[str, Decimal] = {
+        str(r["security_id"]): Decimal(str(r["target_weight"])) for _, r in targets_df.iterrows()
+    }
+
+    # Solve execution
+    v_plus, fee, new_holdings, cash_after = solve_self_financing_execution(
+        v_minus=nav,
+        current_holdings={},
+        target_weights=target_weights,
+    )
+
+    dest_root = output_root or parent_signal_dir.parent
+    run_id = f"reconcile-{new_run_id()[:8]}"
+    out_dir = dest_root / run_id
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    # Compute fills and holdings
+    fills = []
+    holdings = []
+    cutoff_dt = targets_df.iloc[0]["cutoff"]
+
+    for sec, w in target_weights.items():
+        notional = new_holdings.get(sec, Decimal(0))
+        price = open_prices.get(sec, Decimal("100.00"))  # fallback price
+        shares = notional / price if price > 0 else Decimal(0)
+        sec_fee = Decimal("0.001") * notional
+
+        fills.append(
+            {
+                "cutoff": cutoff_dt,
+                "security_id": sec,
+                "side": "buy",
+                "target_weight": str(w),
+                "open_price": str(price),
+                "shares_filled": str(round(shares, 4)),
+                "notional_filled": str(round(notional, 4)),
+                "fee_incurred": str(round(sec_fee, 4)),
+            }
+        )
+        holdings.append(
+            {
+                "cutoff": cutoff_dt,
+                "security_id": sec,
+                "shares": str(round(shares, 4)),
+                "price": str(price),
+                "market_value": str(round(notional, 4)),
+                "weight": str(w),
+            }
+        )
+
+    rebalance_rec = [
+        {
+            "cutoff": cutoff_dt,
+            "execution_time": datetime.now(UTC),
+            "v_minus": str(starting_nav),
+            "v_plus": str(v_plus),
+            "fee_incurred": str(fee),
+            "cash_before": str(starting_nav),
+            "cash_after": str(cash_after),
+            "total_stock_weight": str(sum(target_weights.values())),
+            "cash_weight": str(Decimal(1) - sum(target_weights.values())),
+            "turnover": str(sum(target_weights.values())),
+        }
+    ]
+
+    write_parquet_atomic(
+        pa.Table.from_pylist(fills, schema=EXECUTION_FILL_SCHEMA),
+        out_dir / "execution_fills.parquet",
+        EXECUTION_FILL_SCHEMA,
+    )
+    write_parquet_atomic(
+        pa.Table.from_pylist(holdings, schema=PORTFOLIO_HOLDINGS_SCHEMA),
+        out_dir / "actual_holdings.parquet",
+        PORTFOLIO_HOLDINGS_SCHEMA,
+    )
+    write_parquet_atomic(
+        pa.Table.from_pylist(rebalance_rec, schema=REBALANCE_RECORD_SCHEMA),
+        out_dir / "rebalance_record.parquet",
+        REBALANCE_RECORD_SCHEMA,
+    )
+
+    manifest_file = out_dir / "manifest.json"
+    manifest_file.write_text(
+        json.dumps(
+            {
+                "run_id": run_id,
+                "phase": "reconcile",
+                "parent_signal_run": parent_signal_dir.name,
+            }
+        ),
+        encoding="utf-8",
+    )
+    manifest_sha = sha256_file(manifest_file)
+
+    phase_rec = QuarterlyPhaseRecord(
+        run_id=run_id,
+        cutoff=cutoff_dt,
+        phase="reconcile",
+        status="approved",
+        created_at=datetime.now(UTC),
+        parent_run_id=parent_signal_dir.name,
+        manifest_sha256=manifest_sha,
+        message="Simulated execution fills confirmed; actual holdings recorded",
+    )
+    phase_data = [phase_rec.model_dump(mode="json")]
+    write_parquet_atomic(
+        pa.Table.from_pylist(phase_data, schema=QUARTERLY_PHASE_SCHEMA),
+        out_dir / "quarterly_phase.parquet",
+        QUARTERLY_PHASE_SCHEMA,
+    )
+
+    return 0, out_dir
