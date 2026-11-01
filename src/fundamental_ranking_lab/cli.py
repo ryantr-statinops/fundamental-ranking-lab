@@ -174,3 +174,67 @@ def evaluate_command(
 
     typer.echo(f"Evaluation output generated at: {destination}")
     raise typer.Exit(code=code)
+
+
+@app.command("quarterly")
+def quarterly_command(
+    cutoff: Annotated[str, typer.Option("--cutoff", help="Quarter-end cutoff date (YYYY-MM-DD).")],
+    phase: Annotated[
+        str,
+        typer.Option("--phase", help="Phase to execute: 'signal' or 'reconcile'."),
+    ] = "signal",
+    input_run: Annotated[
+        Path | None,
+        typer.Option("--input-run", help="Parent signal run directory for reconcile phase."),
+    ] = None,
+    output_dir: Annotated[
+        Path | None,
+        typer.Option("--output-dir", help="Optional target output directory."),
+    ] = None,
+) -> None:
+    """Execute quarterly research operations (signal generation or morning reconcile)."""
+    from fundamental_ranking_lab.quarterly import run_quarterly_reconcile, run_quarterly_signal
+
+    try:
+        if phase == "signal":
+            code, destination = run_quarterly_signal(cutoff, Path("configs/pilot.toml"), output_dir)
+        elif phase == "reconcile":
+            if input_run is None:
+                typer.echo("--input-run is required for reconcile phase", err=True)
+                raise typer.Exit(code=2)
+            code, destination = run_quarterly_reconcile(
+                input_run, open_prices={}, output_root=output_dir
+            )
+        else:
+            typer.echo(f"Unknown phase: {phase}. Must be 'signal' or 'reconcile'.", err=True)
+            raise typer.Exit(code=2)
+    except Exception as exc:
+        typer.echo(f"Quarterly operation failure: {type(exc).__name__}: {exc}", err=True)
+        raise typer.Exit(code=1) from None
+
+    typer.echo(f"Quarterly {phase} output generated at: {destination}")
+    raise typer.Exit(code=code)
+
+
+@app.command("replay")
+def replay_command(
+    input_run: Annotated[
+        Path,
+        typer.Option("--input-run", help="Path to pinned run directory to replay offline."),
+    ],
+    output_dir: Annotated[
+        Path | None,
+        typer.Option("--output-dir", help="Target replay output directory."),
+    ] = None,
+) -> None:
+    """Replay a pinned run strictly offline with SHA-256 checksum verification."""
+    from fundamental_ranking_lab.quarterly import run_offline_replay
+
+    try:
+        code, destination = run_offline_replay(input_run, output_dir)
+    except Exception as exc:
+        typer.echo(f"Replay failure: {type(exc).__name__}: {exc}", err=True)
+        raise typer.Exit(code=1) from None
+
+    typer.echo(f"Replayed run successfully at: {destination}")
+    raise typer.Exit(code=code)
